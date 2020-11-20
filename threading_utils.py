@@ -50,12 +50,10 @@ class WaitConsoleThread(threading.Thread):
         quitflag = False
         while not quitflag:
             for (key, events) in selector.select():
-                stanIn = stin()
-                wait = stanIn.waiting()
                 if key == key_socketpair:
                     quitflag = True
-                elif wait == True:
-                        quitflag = True
+                elif key == key_stdin:
+                    quitflag = True
 
         self._quit_barrier.proceed()
 
