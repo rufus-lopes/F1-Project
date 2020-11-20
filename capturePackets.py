@@ -521,8 +521,8 @@ def main():
     logging.info("Decoding Database")
     files = os.listdir("SQL_files")
     for i in range(len(files)):
-        if files[i].lower().endswith(".sqlite3"):
-            files[i] = "SQL_files" + files[i]
+        if files[i].endswith("sqlite3"):
+            files[i] = "SQL_files/" + files[i]
     sorted_by_mtime_desc = sorted(files, key=lambda t: -os.stat(t).st_mtime)
     database = sorted_by_mtime_desc[0]
     DBExpand(database)
