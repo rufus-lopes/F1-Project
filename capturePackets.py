@@ -76,7 +76,7 @@ class PacketRecorder:
     def _open_database(self, sessionUID: str):
         """Open SQLite3 database file and make sure it has the correct schema."""
         assert self._conn is None
-        filename = f"SQL_files/F1_2020_{sessionUID}.sqlite3"
+        filename = f"../SQL_Data/F1_2020_{sessionUID}.sqlite3"
         logging.info("Opening file %s", )
         conn = sqlite3.connect(filename)
         cursor = conn.cursor()
@@ -519,10 +519,12 @@ def main():
 
     # All done.
     logging.info("Decoding Database")
-    files = os.listdir("SQL_files")
+    os.chdir("..")
+    os.chdir("SQL_Data")
+    files = os.listdir()
     for i in range(len(files)):
         if files[i].endswith("sqlite3"):
-            files[i] = "SQL_files/" + files[i]
+            files[i] = "../SQL_Data/" + files[i]
     sorted_by_mtime_desc = sorted(files, key=lambda t: -os.stat(t).st_mtime)
     database = sorted_by_mtime_desc[0]
     DBExpand(database)

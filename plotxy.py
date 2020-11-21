@@ -1,7 +1,7 @@
 import sqlite3
 from matplotlib import pyplot as plt
 def plot():
-    database = "SQL_files/F1_2020_51101ca1a9b0ff60.sqlite3"
+    database = "SQL_files/F1_2020_4fb57d92601437be.sqlite3"
     conn = sqlite3.connect(database)
     cur = conn.cursor()
     cur.execute("SELECT worldPositionX_m, worldPositionZ_m FROM motionData")
