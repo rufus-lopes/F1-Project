@@ -519,19 +519,19 @@ def main():
 
     # All done.
     logging.info("Decoding Database")
-    os.chdir("..")
+    database = findFile():
+    DBExpand(database)
+
+    logging.info("All done.")
+
+def findFile():
     os.chdir("SQL_Data")
     files = os.listdir()
     for i in range(len(files)):
         if files[i].endswith("sqlite3"):
             files[i] = "../SQL_Data/" + files[i]
     sorted_by_mtime_desc = sorted(files, key=lambda t: -os.stat(t).st_mtime)
-    database = sorted_by_mtime_desc[0]
-    DBExpand(database)
-
-    logging.info("All done.")
-
-
+    return sorted_by_mtime_desc[0]
 
 
 if __name__ == "__main__":
