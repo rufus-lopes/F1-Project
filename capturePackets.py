@@ -15,6 +15,11 @@ from values import visualiser#will need changing at some point
 from datatypes import (
 PacketHeader, PacketID, HeaderFieldsToPacketType)
 from UDP_unpacker import unpackUDPpacket
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+import plotly.express as px
+import pandas as pd
 
 from threading_utils import WaitConsoleThread, Barrier
 
@@ -76,7 +81,7 @@ class PacketRecorder:
     def _open_database(self, sessionUID: str):
         """Open SQLite3 database file and make sure it has the correct schema."""
         assert self._conn is None
-        filename = f"../SQL_Data/F1_2020_{sessionUID}.sqlite3"
+        filename = f"SQL_Data/F1_2020_{sessionUID}.sqlite3"
         logging.info("Opening file %s", )
         conn = sqlite3.connect(filename)
         cursor = conn.cursor()
@@ -425,7 +430,7 @@ class PacketReceiverThread(threading.Thread):
                     self._recorder_thread.record_packet(timestamped_packet)
                     vis = self._visualiser_thread
                     vis.accept_packet(packet)
-                    vis.type()
+                    # vis.type()
                 elif key == key_socketpair:
                     quitflag = True
 
@@ -519,18 +524,21 @@ def main():
 
     # All done.
     logging.info("Decoding Database")
-    database = findFile():
+    database = findFile()
+    database = "SQL_Data/" + database
+    print(database)
     DBExpand(database)
-
     logging.info("All done.")
 
 def findFile():
     os.chdir("SQL_Data")
     files = os.listdir()
+    sqliteFiles = []
     for i in range(len(files)):
         if files[i].endswith("sqlite3"):
-            files[i] = "../SQL_Data/" + files[i]
-    sorted_by_mtime_desc = sorted(files, key=lambda t: -os.stat(t).st_mtime)
+            sqliteFiles.append(files[i])
+    sorted_by_mtime_desc = sorted(sqliteFiles, key=lambda t: -os.stat(t).st_mtime)
+    os.chdir("..")
     return sorted_by_mtime_desc[0]
 
 

@@ -1,5 +1,6 @@
 from UDP_unpacker import unpackUDPpacket
 import threading
+import matplotlib.pyplot as plt
 
 class visualiser(threading.Thread):
     def __init__(self):
