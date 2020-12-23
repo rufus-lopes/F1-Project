@@ -13,14 +13,13 @@ def getLapTimes(conn):
     return lapTimes
 
 def addNames(df):
-    lapDataCols = ["index", "SessionTime_s","lastLapTime", "currentLapTime", "sector1TimeInMS", "sector2TimeInMS", "bestLapTime",
+    lapDataCols = ["index", "SessionTime","lastLapTime", "currentLapTime", "sector1TimeInMS", "sector2TimeInMS", "bestLapTime",
     "bestLapNum", "bestLapSector1TimeInMS", "bestLapSector2TimeInMS", "bestLapSector3TimeInMS",
     "bestOverallSector1TimeInMS", "bestOverallSector1LapNum", "bestOverallSector2TimeInMS",
     "bestOverallSector2LapNum", "bestOverallSector3TimeInMS", "bestOverallSector3LapNum",
     "lapDistance", "totalDistance", "safetyCarDelta", "carPosition", "currentLapNum",
     "pitStatus", "sector", "currentLapInvalid", "penalties", "gridPosition", "driverStatus",
     "resultStatus"]
-
     df.columns = lapDataCols
     return df
 
@@ -35,7 +34,7 @@ def finalLapTime(df):
             newLapIndex.append(i)
     newLapIndex.append(i)
     finalLapTimes = {lap:time for (lap,time) in zip(lapNums[newLapIndex],lapTimes[newLapIndex])}
-    df['finalLapTime'] = [finalLapTimes[lap] for lap in lapNums]
+    df["finalLapTime"] = [finalLapTimes[lap] for lap in lapNums]
     return df
 
 def main():
@@ -43,8 +42,10 @@ def main():
     connection = connect(db)
     lapTimesDf = getLapTimes(connection)
     lapTimesDf = addNames(lapTimesDf)
-    lapTimesDf = lapTimesDf.reset_index(drop=True)
-    print(finalLapTime(lapTimesDf).tail())
+    lapTimesDf = finalLapTime(lapTimesDf)
+    masterLapTimeDfVars = ["SessionTime_s", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum", "finalLapTime"]
+    masterLapTimeDf = lapTimesDf[masterLapTimeDfVars]
+    print(masterLapTimeDf.head())
 
 if __name__ == "__main__":
     main()
