@@ -13,7 +13,8 @@ def getLapTimes(conn):
     return lapTimes
 
 def addNames(df):
-    lapDataCols = ["index", "SessionTime","lastLapTime", "currentLapTime", "sector1TimeInMS", "sector2TimeInMS", "bestLapTime",
+    lapDataCols = ["index", "frameIdentifier", "SessionTime","lastLapTime", "currentLapTime",
+     "sector1TimeInMS", "sector2TimeInMS", "bestLapTime",
     "bestLapNum", "bestLapSector1TimeInMS", "bestLapSector2TimeInMS", "bestLapSector3TimeInMS",
     "bestOverallSector1TimeInMS", "bestOverallSector1LapNum", "bestOverallSector2TimeInMS",
     "bestOverallSector2LapNum", "bestOverallSector3TimeInMS", "bestOverallSector3LapNum",

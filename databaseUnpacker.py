@@ -18,9 +18,11 @@ class localFormat(object):
         player_motion = motion_packet.carMotionData[motion_packet.header.playerCarIndex]
         arr = np.ctypeslib.as_array(player_motion).tolist()
         arr = list(arr)
+
         sessTime = motion_packet.header.sessionTime
         arr.insert(0, sessTime)
-
+        frame = self.packet.header.frameIdentifier
+        arr.insert(0, frame)
         #getting additional data for player car only
         suspensionPositionRL = motion_packet.suspensionPosition[0]
         suspensionPositionRR = motion_packet.suspensionPosition[1]
@@ -64,30 +66,40 @@ angularVelocityZ, angularAccelerationX, angularAccelerationY, angularAcceleratio
         arr = list(arr)
         sessTime = self.packet.header.sessionTime
         arr.insert(0, sessTime)
+        frame = self.packet.header.frameIdentifier
+        arr.insert(0, frame)
         return arr
     def lap(self):
         arr = np.ctypeslib.as_array(self.packet.lapData[self.packet.header.playerCarIndex]).tolist()
         arr = list(arr)
         sessTime = self.packet.header.sessionTime
         arr.insert(0, sessTime)
+        frame = self.packet.header.frameIdentifier
+        arr.insert(0, frame)
         return arr
     def event(self):
         arr = np.ctypeslib.as_array(self.packet.eventStringCode)#.tolist()
         arr = [arr]
         sessTime = self.packet.header.sessionTime
         arr.insert(0, sessTime)
+        frame = self.packet.header.frameIdentifier
+        arr.insert(0, frame)
         return arr
     def participants(self):
         arr = np.ctypeslib.as_array(self.packet.participants[self.packet.header.playerCarIndex]).tolist()
         arr = list(arr)
         sessTime = self.packet.header.sessionTime
         arr.insert(0, sessTime)
+        frame = self.packet.header.frameIdentifier
+        arr.insert(0, frame)
         return arr
     def carSetups(self):
         arr = np.ctypeslib.as_array(self.packet.carSetups[self.packet.header.playerCarIndex]).tolist()
         arr = list(arr)
         sessTime = self.packet.header.sessionTime
         arr.insert(0, sessTime)
+        frame = self.packet.header.frameIdentifier
+        arr.insert(0, frame)
         return arr
     def carTelemetry(self):
 
@@ -95,6 +107,7 @@ angularVelocityZ, angularAccelerationX, angularAccelerationY, angularAcceleratio
         arr = list(arr)
         sessTime = self.packet.header.sessionTime
         arr.insert(0, sessTime)
+
         #expanding out arrays within packet array.
         #maybe a better way to do this
         flat = []
@@ -105,6 +118,8 @@ angularVelocityZ, angularAccelerationX, angularAccelerationY, angularAcceleratio
             else:
                 flat.append(i)
         arr = flat
+        frame = self.packet.header.frameIdentifier
+        arr.insert(0, frame)
         return arr
     def carStatus(self):
         arr = np.ctypeslib.as_array(self.packet.carStatusData[self.packet.header.playerCarIndex]).tolist()
@@ -119,16 +134,22 @@ angularVelocityZ, angularAccelerationX, angularAccelerationY, angularAcceleratio
             else:
                 flat.append(i)
         arr = flat
+        frame = self.packet.header.frameIdentifier
+        arr.insert(0, frame)
         return arr
     def finalClassification(self):
         arr = np.ctypeslib.as_array(self.packet).tolist()
         arr = list(arr)
         sessTime = self.packet.header.sessionTime
         arr.insert(0, sessTime)
+        frame = self.packet.header.frameIdentifier
+        arr.insert(0, frame)
         return arr
     def lobbyInfo(self):
         arr = np.ctypeslib.as_array(self.packet).tolist()
         arr = list(arr)
         sessTime = self.packet.header.sessionTime
         arr.insert(0, sessTime)
+        frame = self.packet.header.frameIdentifier
+        arr.insert(0, frame)
         return arr

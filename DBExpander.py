@@ -102,26 +102,26 @@ def masterLapData(connection):
     lapTimesDf = getLapTimes(connection)
     lapTimesDf = addNames(lapTimesDf)
     lapTimesDf = finalLapTime(lapTimesDf)
-    masterLapDataDfVars = ["SessionTime", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum", "finalLapTime"]
+    masterLapDataDfVars = ["frameIdentifier", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum", "finalLapTime"]
     masterLapDataDf = lapTimesDf[masterLapDataDfVars]
     return masterLapDataDf
 
 
 def masterPacketData(connection):
     cur = connection.cursor()
-    cur.execute("SELECT pkt_id, packetId, sessionUID, sessionTime FROM packets")
+    cur.execute("SELECT frameIdentifier, pkt_id, packetId, sessionUID, sessionTime FROM packets")
     masterPacketDf = pd.DataFrame(cur.fetchall())
-    packetCols = ["pkt_id", "packetId", "sessionUID", "SessionTime"]
+    packetCols = ["frameIdentifier", "pkt_id", "packetId", "sessionUID", "SessionTime"]
     masterPacketDf.columns = packetCols
     return masterPacketDf
 
 def masterMotionData(connection):
     cur = connection.cursor()
-    cur.execute("""SELECT SessionTime, worldPositionX, worldPositionY, worldPositionZ,
+    cur.execute("""SELECT frameIdentifier, worldPositionX, worldPositionY, worldPositionZ,
         worldVelocityX, worldVelocityY, worldVelocityZ, yaw, pitch, roll FROM motionData""")
 
     masterMotionDf = pd.DataFrame(cur.fetchall())
-    motionCols = ["SessionTime", "worldPositionX", "worldPositionY", "worldPositionZ",
+    motionCols = ["frameIdentifier", "worldPositionX", "worldPositionY", "worldPositionZ",
         "worldVelocityX", "worldVelocityY", "worldVelocityZ", "yaw", "pitch", "roll"]
 
     masterMotionDf.columns = motionCols
@@ -129,12 +129,12 @@ def masterMotionData(connection):
 
 def masterTelemetryData(connection):
     cur = connection.cursor()
-    cur.execute("""SELECT SessionTime, speed, throttle, steer, brake, clutch, gear, engineRPM,
+    cur.execute("""SELECT frameIdentifier, speed, throttle, steer, brake, clutch, gear, engineRPM,
      drs, brakesTemperatureRL, brakesTemperatureRR, brakesTemperatureFL, brakesTemperatureFR,
      tyresSurfaceTemperatureRL, tyresSurfaceTemperatureRR, tyresSurfaceTemperatureFL,
      tyresSurfaceTemperatureFR, engineTemperature FROM telemetryData""")
     masterTelemetryDf = pd.DataFrame(cur.fetchall())
-    telemetryCols = ["SessionTime", "speed", "throttle", "steer", "brake", "clutch", "gear", "engineRPM",
+    telemetryCols = ["frameIdentifier", "speed", "throttle", "steer", "brake", "clutch", "gear", "engineRPM",
     "drs", "brakesTemperatureRL", "brakesTemperatureRR", "brakesTemperatureFL", "brakesTemperatureFR",
     "tyresSurfaceTemperatureRL", "tyresSurfaceTemperatureRR",
     "tyresSurfaceTemperatureFL", "tyresSurfaceTemperatureFR", "engineTemperature"]
@@ -144,26 +144,26 @@ def masterTelemetryData(connection):
 def masterSetupData(connection):
     cur = connection.cursor()
     cur.execute("SELECT * FROM CarSetupData")
-    masterSetupDF = pd.DataFrame(cur.fetchall())
-    setupCols = ["Index", "SessionTime", "frontWing", "rearWing", "onThrottle", "offThrottle", "frontCamber",
+    masterSetupDf = pd.DataFrame(cur.fetchall())
+    setupCols = [ "Index", "frameIdentifier", "SessionTime", "frontWing", "rearWing", "onThrottle", "offThrottle", "frontCamber",
     "rearCamber", "frontToe", "rearToe", "frontSuspension", "rearSuspension", "frontAntiRollBar",
     "rearAntiRollBar", "frontSuspensionHeight", "rearSuspensionHeight", "brakePressure", "brakeBias",
     "rearLeftTyrePressure", "rearRightTyrePressure", "frontLeftTyrePressure", "frontRightTyrePressure",
     "ballast","fuelLoad"]
-    masterSetupDF.columns = setupCols
-    masterSetupDF = masterSetupDF.drop('Index', 1)
-    return masterSetupDF
+    masterSetupDf.columns = setupCols
+    masterSetupDf = masterSetupDf.drop('Index', 1)
+    masterSetupDf = masterSetupDf.drop("SessionTime", 1)
+    return masterSetupDf
 
 def masterStatusData(connection):
     cur = connection.cursor()
-    cur.execute("""SELECT sessionTime, fuelMix, FrontBrakeBias, fuelInTank, fuelRemainingLaps,
+    cur.execute("""SELECT frameIdentifier, fuelMix, FrontBrakeBias, fuelInTank, fuelRemainingLaps,
     tyresWearRL, tyresWearRR, tyresWearFL, tyresWearFR, actualTyreCompound, tyresAgeLaps  FROM carStatusData""")
     masterStatusDf = pd.DataFrame(cur.fetchall())
-    statusCols = ["SessionTime", "fuelMix", "FrontBrakeBias", "fuelInTank", "fuelRemainingLaps",
+    statusCols = ["frameIdentifier", "fuelMix", "FrontBrakeBias", "fuelInTank", "fuelRemainingLaps",
     "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", "actualTyreCompound", "tyresAgeLaps"]
     masterStatusDf.columns = statusCols
     return masterStatusDf
-
 
 def masterData(conn):
 
@@ -174,14 +174,16 @@ def masterData(conn):
     masterSetupDF = masterSetupData(conn)
     masterStatusDf = masterStatusData(conn)
 
+    masterDf = masterLapDf.merge(masterPacketDf, on='frameIdentifier')#.merge(masterMotionDf, on='frameIdentifier').merge(masterTelemetryDf, on='frameIdentifier').merge(masterSetupDF, on='frameIdentifier').merge(masterStatusDf, on='frameIdentifier')
+    masterDf = masterDf.merge(masterMotionDf, on='frameIdentifier')
+    masterDf = masterDf.merge(masterTelemetryDf, on='frameIdentifier')
+    masterDf = masterDf.merge(masterStatusDf, on='frameIdentifier')
 
-    masterDf = masterLapDf.merge(masterPacketDf, on='SessionTime').merge(masterMotionDf, on='SessionTime').merge(masterTelemetryDf, on='SessionTime').merge(masterSetupDF, on='SessionTime').merge(masterStatusDf, on='SessionTime')
+    return masterDf, masterSetupDf
 
-    return masterDf
-
-def masterDfToSQL(df, conn):
-    df.to_sql("MasterData", con = conn, schema = None, if_exists = 'replace')
-
+def masterDfToSQL(df1, df2 conn):
+    df1.to_sql("MasterData", con = conn, schema = None, if_exists = 'replace')
+    df2.to_sql("MasterSetupData", con = conn, shema = None, if_exists = 'replace')
 def DBExpand(database):
     # try:
     column_names = ["pkt_id", "timestamp", "packetFormat", "gameMajorVersion", "gameMinorVersion", "packetVersion", "packetId", "sessionUID", "sessionTime", "frameIdentifier", "playerCarIndex", "packet"]
@@ -192,8 +194,8 @@ def DBExpand(database):
     df.reset_index(drop = True, inplace = True)
     motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF, carStatusDF = globalFormater(df)
     Tables(motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF, carStatusDF, conn)
-    masterDf = masterData(conn)
-    masterDfToSQL(masterDf, conn)
+    masterDf, masterSetupDf = masterData(conn)
+    masterDfToSQL(masterDf, masterSetupDf conn)
     conn.close()
     # except:
     #     logging.info("Error: Database does not exist")
