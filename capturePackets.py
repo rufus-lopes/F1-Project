@@ -20,6 +20,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.express as px
 import pandas as pd
+import csv
+
 
 from threading_utils import WaitConsoleThread, Barrier
 
@@ -419,6 +421,7 @@ class PacketReceiverThread(threading.Thread):
             self._udp_port,
         )
 
+
         quitflag = False
         while not quitflag:
             for (key, events) in selector.select():
@@ -426,11 +429,18 @@ class PacketReceiverThread(threading.Thread):
                 if key == key_udp_socket:
                     # All telemetry UDP packets fit in 2048 bytes with room to spare.
                     packet = udp_socket.recv(2048)
+                    readPacket = unpackUDPpacket(packet)
+                    fileName = readPacket.header.sessionUID
+                    fileName = str(fileName) + '.csv'
+                    with open(fileName, 'w', newline = '') as file:
+                        writer = csv.writer(file)
+                        writer.writerow(["sessionTime", "Speed"])
                     timestamped_packet = TimestampedPacket(timestamp, packet)
                     self._recorder_thread.record_packet(timestamped_packet)
                     vis = self._visualiser_thread
                     vis.accept_packet(packet)
-                    # vis.type()
+                    vis.write(writer)
+
                 elif key == key_socketpair:
                     quitflag = True
 
@@ -526,7 +536,6 @@ def main():
     logging.info("Decoding Database")
     database = findFile()
     database = "SQL_Data/" + database
-    print(database)
     DBExpand(database)
     logging.info("All done.")
 
