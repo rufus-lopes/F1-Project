@@ -96,7 +96,6 @@ def Tables(motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF,
     carSetupsDF.to_sql("CarSetupData", con = conn, schema=None, if_exists='replace')
     carTelemetryDF.to_sql("TelemetryData", con = conn, schema=None, if_exists='replace')
     carStatusDF.to_sql("CarStatusData", con = conn, schema=None, if_exists='replace')
-    print(sessionDF.head())
     sessionDF.to_sql("SessionData", con=conn, schema=None, if_exists='replace')
 
 
@@ -202,7 +201,7 @@ def masterData(conn):
 def sessionReducer(df):
     df = df.drop('Header', 1)
     df = df.drop('weatherForecastSamples', 1)
-    
+
     return df
 
 def masterDfToSQL(df1, df2, conn):
