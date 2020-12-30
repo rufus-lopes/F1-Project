@@ -23,6 +23,7 @@ import pandas as pd
 import csv
 
 
+
 from threading_utils import WaitConsoleThread, Barrier
 
 TimestampedPacket = namedtuple("TimestampedPacket", "timestamp, packet")
@@ -429,18 +430,12 @@ class PacketReceiverThread(threading.Thread):
                 if key == key_udp_socket:
                     # All telemetry UDP packets fit in 2048 bytes with room to spare.
                     packet = udp_socket.recv(2048)
-                    readPacket = unpackUDPpacket(packet)
-                    fileName = readPacket.header.sessionUID
-                    fileName = str(fileName) + '.csv'
-                    with open(fileName, 'w', newline = '') as file:
-                        writer = csv.writer(file)
-                        writer.writerow(["sessionTime", "Speed"])
                     timestamped_packet = TimestampedPacket(timestamp, packet)
                     self._recorder_thread.record_packet(timestamped_packet)
+
                     vis = self._visualiser_thread
                     vis.accept_packet(packet)
-                    vis.write(writer)
-
+                    vis.write()
                 elif key == key_socketpair:
                     quitflag = True
 
@@ -475,6 +470,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Record F1 2019 telemetry data to SQLite3 files."
     )
+    setupPacket = getSessionInfo()
+    _sessionUID = setupPacket.header.sessionUID
+    setupCSV(setupPacket)
 
     parser.add_argument(
         "-p",
@@ -493,7 +491,6 @@ def main():
         dest="interval",
     )
 
-
     args = parser.parse_args()
 
     # Start recorder thread first, then receiver thread.
@@ -503,7 +500,7 @@ def main():
     recorder_thread = PacketRecorderThread(args.interval)
     recorder_thread.start()
 
-    visualiser_thread = visualiser()
+    visualiser_thread = visualiser(_sessionUID)
     visualiser_thread.start()
 
     receiver_thread = PacketReceiverThread(args.port, recorder_thread, visualiser_thread)
@@ -538,6 +535,39 @@ def main():
     database = "SQL_Data/" + database
     DBExpand(database)
     logging.info("All done.")
+
+def setupCSV(packet):
+    sessionUID = packet.header.sessionUID
+    fileName = f"CSV_Data/{sessionUID}.csv"
+
+    motionCols = ["frameIdentifier", "SessionTime", "worldPositionX", "worldPositionY", "worldPositionZ", "worldVelocityX", "worldVelocityY",
+    "worldVelocityZ","worldForwardDirX", "worldForwardDirY", "worldForwardDirZ", "worldRightDirX", "worldRightDirY",
+    "worldRightDirZ","gForceLateral", "gForceLongitudinal","gForceVertical", "yaw", "pitch", "roll", "suspensionPositionRL",
+    "suspensionPositionRR", "suspensionPositionFL", "suspensionPositionFR", "suspensionVelocityRL",
+    "suspensionVelocityRR", "suspensionVelocityFL", "suspensionVelocityFR", "suspensionAccelerationRL", "suspensionAccelerationRR",
+    "suspensionAccelerationFL", "suspensionAccelerationFR", "wheelSpeedRL", "wheelSpeedRR", "wheelSpeedFL", "wheelSpeedFR", "wheelSlipRL",
+    "wheelSlipRR", "wheelSlipFL","wheelSlipFR", "localVelocityX", "localVelocityY", "localVelocityZ", "angularVelocityX", "angularVelocityY",
+    "angularVelocityZ", "angularAccelerationX", "angularAccelerationY", "angularAccelerationZ", "frontWheelsAngle"]
+
+    with open(fileName, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(motionCols)
+
+def getSessionInfo():
+    """Captures the first packet of the session and uses this for basic information regarding
+    visualiser setup"""
+
+    UDP_IP = "0.0.0.0"
+    UDP_PORT = 20777
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((UDP_IP, UDP_PORT))
+
+    while True:
+        data, addr = sock.recvfrom(1024)
+        if data:
+            break
+
+    return unpackUDPpacket(data)
 
 def findFile():
     os.chdir("SQL_Data")

@@ -213,6 +213,7 @@ def DBExpand(database):
     column_names = ["pkt_id", "timestamp", "packetFormat", "gameMajorVersion", "gameMinorVersion", "packetVersion", "packetId", "sessionUID", "sessionTime", "frameIdentifier", "playerCarIndex", "packet"]
         #database = "SQL_files/F1_2020_51101ca1a9b0ff60.sqlite3" testing with this database
     conn = connect(database)
+    logging.info("Expanding " + str(database))
     df = selectALL(conn)
     df.columns = column_names
     df.reset_index(drop = True, inplace = True)
