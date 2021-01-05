@@ -21,9 +21,6 @@ import dash_html_components as html
 import plotly.express as px
 import pandas as pd
 import csv
-
-
-
 from threading_utils import WaitConsoleThread, Barrier
 
 TimestampedPacket = namedtuple("TimestampedPacket", "timestamp, packet")
@@ -573,11 +570,13 @@ def findFile():
     os.chdir("SQL_Data")
     files = os.listdir()
     sqliteFiles = []
+
     for i in range(len(files)):
         if files[i].endswith("sqlite3"):
             sqliteFiles.append(files[i])
     sorted_by_mtime_desc = sorted(sqliteFiles, key=lambda t: -os.stat(t).st_mtime)
     os.chdir("..")
+
     return sorted_by_mtime_desc[0]
 
 
