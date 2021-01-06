@@ -10,8 +10,10 @@ def setupCSV(_sessionUID):
     sessionUID = _sessionUID
     parent = os.getcwd()
     dir = f"CSV_Data/{sessionUID}"
-    path = os.path.join(parent, dir)
-    os.mkdir(path)
+    _path = os.path.join(parent, dir)
+    if not os.path.exists(_path):
+        os.mkdir(_path)
+    
     motionFileName = f"CSV_Data/{sessionUID}/motion.csv"
     sessionFileName = f"CSV_Data/{sessionUID}/session.csv"
     lapFileName = f"CSV_Data/{sessionUID}/lap.csv"

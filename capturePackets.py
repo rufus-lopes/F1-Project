@@ -434,6 +434,7 @@ class PacketReceiverThread(threading.Thread):
                     csvWriter = self._csvWriter_thread
                     csvWriter.accept_packet(packet)
                     csvWriter.write()
+                    
                 elif key == key_socketpair:
                     quitflag = True
 
@@ -491,6 +492,8 @@ def main():
 
     args = parser.parse_args()
 
+    csvWriter_thread = csvWriter(_sessionUID)
+
     # Start recorder thread first, then receiver thread.
 
     quit_barrier = Barrier()
@@ -498,8 +501,6 @@ def main():
     recorder_thread = PacketRecorderThread(args.interval)
     recorder_thread.start()
 
-    csvWriter_thread = csvWriter(_sessionUID)
-    csvWriter_thread.start()
 
     receiver_thread = PacketReceiverThread(args.port, recorder_thread, csvWriter_thread)
     receiver_thread.start()
@@ -512,7 +513,7 @@ def main():
     quit_barrier.wait()
 
     # Stop threads.
-    csvWriter_thread.join()
+
 
     wait_console_thread.request_quit()
     wait_console_thread.join()

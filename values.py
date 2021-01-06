@@ -7,9 +7,8 @@ import pandas as pd
 from databaseUnpacker import localFormat
 
 
-class csvWriter(threading.Thread):
+class csvWriter(object):
     def __init__(self, _sessionUID):
-        super().__init__(name="visualiser")
         self.packet = None
         self.unpacked = None
         self.type = None
@@ -19,7 +18,6 @@ class csvWriter(threading.Thread):
         self.packet = packet
         self.unpacked = unpackUDPpacket(self.packet)
         self.type = self.unpacked.header.packetId
-        self.sessionUID = self.unpacked.header.sessionUID
     def write(self):
         type_to_function = {0:"motion", 1:"session", 2:"lap", 3:"event", 4:"participants",
         5:"setup", 6:"telemetry", 7:"status", 8:"finalClassification", 9:"lobbyInfo"}
@@ -32,26 +30,26 @@ class csvWriter(threading.Thread):
         #         writer.writerow(data)
     def motion(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{sessionUID}/motion.csv"
+        fileName = f"CSV_Data/{self.sessionUID}/motion.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
 
     def session(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{sessionUID}/session.csv"
+        fileName = f"CSV_Data/{self.sessionUID}/session.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
     def lap(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{sessionUID}/lap.csv"
+        fileName = f"CSV_Data/{self.sessionUID}/lap.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
     def event(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{sessionUID}/event.csv"
+        fileName = f"CSV_Data/{self.sessionUID}/event.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
@@ -59,20 +57,20 @@ class csvWriter(threading.Thread):
         pass
     def setup(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{sessionUID}/setup.csv"
+        fileName = f"CSV_Data/{self.sessionUID}/setup.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
     def telemetry(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{sessionUID}/telemetry.csv"
+        fileName = f"CSV_Data/{self.sessionUID}/telemetry.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
     def status(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{sessionUID}/status.csv"
-        with open(fileName, 'a') as file: 
+        fileName = f"CSV_Data/{self.sessionUID}/status.csv"
+        with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
     def finalClassification(self):
