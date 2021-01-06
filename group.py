@@ -23,7 +23,9 @@ lapData = []
 for l in groupNames:
     lapData.append(g.get_group(l))
 
-print(type(lapData[0]))
-# db = sqlite3.connect("groupTest.db")
-# conn2 = sqlite3.connect("groupTest.sqlite3")
-# df.to_sql("group", con = conn2, schema = None, if_exists = 'replace' )
+
+lapData[0].reset_index(drop=True, inplace=True)
+
+print(lapData[0].head())
+conn2 = sqlite3.connect("groupTest.sqlite3")
+lapData[0].to_sql("group", con = conn2, schema = None, if_exists = 'replace' )

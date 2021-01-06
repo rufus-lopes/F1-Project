@@ -534,8 +534,8 @@ def main():
     logging.info("All done.")
 
 def setupCSV(packet):
-    sessionUID = packet.header.sessionUID
-    fileName = f"CSV_Data/{sessionUID}.csv"
+    _sessionUID = packet.sessionUID
+    fileName = f"CSV_Data/{_sessionUID}.csv"
 
     motionCols = ["frameIdentifier", "SessionTime", "worldPositionX", "worldPositionY", "worldPositionZ", "worldVelocityX", "worldVelocityY",
     "worldVelocityZ","worldForwardDirX", "worldForwardDirY", "worldForwardDirZ", "worldRightDirX", "worldRightDirY",

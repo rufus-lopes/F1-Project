@@ -12,6 +12,7 @@ class visualiser(threading.Thread):
         super().__init__(name="visualiser")
         self.packet = None
         self.unpacked = None
+        self.type = None
         self.sessionUID = _sessionUID
         self.fileName = "CSV_Data/" + str(_sessionUID) + ".csv"
     def accept_packet(self, packet):
@@ -26,8 +27,3 @@ class visualiser(threading.Thread):
             with open(self.fileName, 'a') as file:
                 writer = csv.writer(file)
                 writer.writerow(data)
-
-            #df.to_csv(self.fileName, mode='a', header=False)
-    def plotter(self):
-        """test plotting functionality using csv"""
-        pass
