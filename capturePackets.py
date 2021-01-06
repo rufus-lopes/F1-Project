@@ -82,7 +82,7 @@ class PacketRecorder:
         """Open SQLite3 database file and make sure it has the correct schema."""
         assert self._conn is None
         filename = f"SQL_Data/F1_2020_{sessionUID}.sqlite3"
-        logging.info("Opening file %s", )
+        logging.info("Opening file %s", filename)
         conn = sqlite3.connect(filename)
         cursor = conn.cursor()
 
@@ -468,8 +468,8 @@ def main():
         description="Record F1 2019 telemetry data to SQLite3 files."
     )
     setupPacket = getSessionInfo()
-    _sessionUID = setupPacket.header.sessionUID
-    setupCSV(setupPacket)
+    _sessionUID = f"{setupPacket.header.sessionUID:016x}"
+    setupCSV(_sessionUID)
 
     parser.add_argument(
         "-p",
@@ -533,9 +533,9 @@ def main():
     DBExpand(database)
     logging.info("All done.")
 
-def setupCSV(packet):
-    _sessionUID = packet.sessionUID
-    fileName = f"CSV_Data/{_sessionUID}.csv"
+def setupCSV(_sessionUID):
+    sessionUID = _sessionUID
+    fileName = f"CSV_Data/{sessionUID}.csv"
 
     motionCols = ["frameIdentifier", "SessionTime", "worldPositionX", "worldPositionY", "worldPositionZ", "worldVelocityX", "worldVelocityY",
     "worldVelocityZ","worldForwardDirX", "worldForwardDirY", "worldForwardDirZ", "worldRightDirX", "worldRightDirY",
@@ -560,7 +560,7 @@ def getSessionInfo():
     sock.bind((UDP_IP, UDP_PORT))
 
     while True:
-        data, addr = sock.recvfrom(1024)
+        data, addr = sock.recvfrom(2048)
         if data:
             break
 

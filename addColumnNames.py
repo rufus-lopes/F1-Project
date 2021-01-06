@@ -55,9 +55,11 @@ def addColumnNames(motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTele
     motionDF.columns = motionCols
     sessionDF.columns = sessionCols
     lapDataDF.columns = lapDataCols
-    eventDF.columns = eventCols
     carSetupsDF.columns = carSetupsCols
     carTelemetryDF.columns = carTelemetryCols
     carStatusDF.columns = carStatusCols
+
+    if not eventDF.empty:
+        eventDF.columns = eventCols
 
     return motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF, carStatusDF

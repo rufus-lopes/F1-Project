@@ -14,7 +14,7 @@ class visualiser(threading.Thread):
         self.unpacked = None
         self.type = None
         self.sessionUID = _sessionUID
-        self.fileName = "CSV_Data/" + str(_sessionUID) + ".csv"
+        self.fileName = "CSV_Data/" + str(self.sessionUID) + ".csv"
     def accept_packet(self, packet):
         self.packet = packet
         self.unpacked = unpackUDPpacket(self.packet)
