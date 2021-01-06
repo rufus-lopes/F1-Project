@@ -31,25 +31,50 @@ class csvWriter(threading.Thread):
         #         writer = csv.writer(file)
         #         writer.writerow(data)
     def motion(self):
-        print("motion")
-        pass
+        data = localFormat(self.unpacked, self.type).arr
+        fileName = f"CSV_Data/{sessionUID}/motion.csv"
+        with open(fileName, 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(data)
+
     def session(self):
-        print("session")
-        pass
+        data = localFormat(self.unpacked, self.type).arr
+        fileName = f"CSV_Data/{sessionUID}/session.csv"
+        with open(fileName, 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(data)
     def lap(self):
-        print("lap")
-        pass
+        data = localFormat(self.unpacked, self.type).arr
+        fileName = f"CSV_Data/{sessionUID}/lap.csv"
+        with open(fileName, 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(data)
     def event(self):
-        print("event") 
-        pass
+        data = localFormat(self.unpacked, self.type).arr
+        fileName = f"CSV_Data/{sessionUID}/event.csv"
+        with open(fileName, 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(data)
     def participants(self):
         pass
     def setup(self):
-        pass
+        data = localFormat(self.unpacked, self.type).arr
+        fileName = f"CSV_Data/{sessionUID}/setup.csv"
+        with open(fileName, 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(data)
     def telemetry(self):
-        pass
+        data = localFormat(self.unpacked, self.type).arr
+        fileName = f"CSV_Data/{sessionUID}/telemetry.csv"
+        with open(fileName, 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow(data)
     def status(self):
-        pass
+        data = localFormat(self.unpacked, self.type).arr
+        fileName = f"CSV_Data/{sessionUID}/status.csv"
+        with open(fileName, 'a') as file: 
+            writer = csv.writer(file)
+            writer.writerow(data)
     def finalClassification(self):
         pass
     def lobbyInfo(self):
