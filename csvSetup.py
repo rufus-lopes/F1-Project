@@ -2,17 +2,23 @@ import numpy as np
 import pandas as pd
 import csv
 import logging
+import socket
+import os
+from UDP_unpacker import unpackUDPpacket
 
 def setupCSV(_sessionUID):
     sessionUID = _sessionUID
-
-    motionFileName = "motion_" + f"CSV_Data/{sessionUID}.csv"
-    sessionFileName = "session_" + f"CSV_Data/{sessionUID}.csv"
-    lapFileName = "lap_" + f"CSV_Data/{sessionUID}.csv"
-    eventFileName = "event_" + f"CSV_Data/{sessionUID}.csv"
-    setupFileName = "setup_" + f"CSV_Data/{sessionUID}.csv"
-    telemetryFileName = "telemetry_" + f"CSV_Data/{sessionUID}.csv"
-    statusFileName = "status_" + f"CSV_Data/{sessionUID}.csv"
+    parent = os.getcwd()
+    dir = f"CSV_Data/{sessionUID}"
+    path = os.path.join(parent, dir)
+    os.mkdir(path)
+    motionFileName = f"CSV_Data/{sessionUID}/motion.csv"
+    sessionFileName = f"CSV_Data/{sessionUID}/session.csv"
+    lapFileName = f"CSV_Data/{sessionUID}/lap.csv"
+    eventFileName = f"CSV_Data/{sessionUID}/event.csv"
+    setupFileName = f"CSV_Data/{sessionUID}/setup.csv"
+    telemetryFileName = f"CSV_Data/{sessionUID}/telemetry.csv"
+    statusFileName = f"CSV_Data/{sessionUID}/status.csv"
 
     fileNames = [motionFileName, sessionFileName, lapFileName, eventFileName, setupFileName, telemetryFileName, statusFileName]
 
