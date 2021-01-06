@@ -5,7 +5,7 @@ import csv
 import numpy as np
 import pandas as pd
 from databaseUnpacker import localFormat
-
+from matplotlib.animation import FuncAnimation
 
 class visualiser(threading.Thread):
     def __init__(self, _sessionUID):
@@ -26,8 +26,6 @@ class visualiser(threading.Thread):
             with open(self.fileName, 'a') as file:
                 writer = csv.writer(file)
                 writer.writerow(data)
-
-            #df.to_csv(self.fileName, mode='a', header=False)
     def plotter(self):
         """test plotting functionality using csv"""
-        pass
+        
