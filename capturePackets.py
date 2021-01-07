@@ -537,6 +537,7 @@ def main():
     recorder_thread.join()
     recorder_thread.close()
 
+    masterWriter_thread.requestQuit(True)
     masterWriter_thread.join()
 
     # All done.

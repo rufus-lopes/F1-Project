@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from databaseUnpacker import localFormat
 import logging
+import ctypes
 
 
 class csvWriter(object):
@@ -85,7 +86,7 @@ class csvWriter(object):
 
 class masterWriter(threading.Thread):
     def __init__(self, _sessionUID):
-        super().__init__(name="masterWriter")
+        super().__init__(name="CSVWriter")
         self.sessionUID = _sessionUID
         self.files = [
         f'CSV_Data/{self.sessionUID}/motion.csv',
@@ -104,6 +105,7 @@ class masterWriter(threading.Thread):
         self.status = None
         self.filteredDF = []
         self.master = None
+        self.quitflag = False
     def read(self):
         '''reading the data into a DataFrame''' #consider using numpy if this is slow
         for file in self.files:
@@ -151,14 +153,15 @@ class masterWriter(threading.Thread):
         self.master.to_csv(f'CSV_Data/{self.sessionUID}/master.csv')
     def run(self):
         logging.info("Master CSV writer thread started")
-        quitflag = False
-        while not quitflag:
-            quitflag = self.requestQuit()
+        while True:
             self.read()
             self.sorter()
             self.writer()
-    def requestQuit(self):
-        if threading.active_count() == 2: #definitely not the best. Try and see if this is last thread or something
-            return True
+            if self.quitflag == True:
+                break
+        logging.info("CSV Writer thread stopped")
+    def requestQuit(self, *args):
+        if args:
+            self.quitflag = True
         else:
-            return False
+            self.quitflag = False
