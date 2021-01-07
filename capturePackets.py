@@ -24,6 +24,8 @@ import csv
 from threading_utils import WaitConsoleThread, Barrier
 from csvSetup import setupCSV, getSessionInfo
 
+
+
 TimestampedPacket = namedtuple("TimestampedPacket", "timestamp, packet")
 
 # The type used by the PacketRecorderThread to represent incoming telemetry packets for storage in the SQLite3 database.
@@ -519,6 +521,7 @@ def main():
     masterWriter_thread.start()
 
     # Recorder, receiver, and wait_console threads are now active. Run until we're asked to quit.
+
 
     quit_barrier.wait()
 

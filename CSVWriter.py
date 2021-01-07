@@ -8,7 +8,6 @@ from databaseUnpacker import localFormat
 import logging
 import ctypes
 
-
 class csvWriter(object):
     def __init__(self, _sessionUID):
         self.packet = None
@@ -80,10 +79,6 @@ class csvWriter(object):
     def lobbyInfo(self):
         pass
 
-
-
-
-
 class masterWriter(threading.Thread):
     def __init__(self, _sessionUID):
         super().__init__(name="CSVWriter")
@@ -96,6 +91,7 @@ class masterWriter(threading.Thread):
         f'CSV_Data/{self.sessionUID}/status.csv'
         ] #not including event data in master table
         self.seperateData = []
+        self.previousRows = [0]*5
         self.headers = []
         self.motion = None
         self.lap = None
@@ -103,65 +99,73 @@ class masterWriter(threading.Thread):
         self.setup = None
         self.telemetry = None
         self.status = None
-        self.filteredDF = []
         self.master = None
         self.quitflag = False
-    def read(self):
-        '''reading the data into a DataFrame''' #consider using numpy if this is slow
-        for file in self.files:
-            self.seperateData.append(pd.read_csv(file, index_col = False))
+        self.first = True
 
-            # with open(file, 'r') as f:
-            #     reader = csv.reader(f, delimeter = ',')
-            #     self.headers.append(next(reader))
-            #     self.seperateData.append(np.array(list(reader)).astype(float))
-    def sorter(self):
-        motionCols = ["frameIdentifier", "worldPositionX", "worldPositionY", "worldPositionZ",
+        self.motionCols = ["frameIdentifier", "worldPositionX", "worldPositionY", "worldPositionZ",
             "worldVelocityX", "worldVelocityY", "worldVelocityZ", "yaw", "pitch", "roll"]
 
-        lapCols= ["frameIdentifier", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum"]
+        self.lapCols= ["frameIdentifier", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum"]
 
-        setupCols = ["frameIdentifier", "SessionTime", "frontWing", "rearWing", "onThrottle", "offThrottle", "frontCamber",
+        self.setupCols = ["frameIdentifier", "SessionTime", "frontWing", "rearWing", "onThrottle", "offThrottle", "frontCamber",
         "rearCamber", "frontToe", "rearToe", "frontSuspension", "rearSuspension", "frontAntiRollBar",
         "rearAntiRollBar", "frontSuspensionHeight", "rearSuspensionHeight", "brakePressure", "brakeBias",
         "rearLeftTyrePressure", "rearRightTyrePressure", "frontLeftTyrePressure", "frontRightTyrePressure",
         "ballast","fuelLoad"]
 
-        telemetryCols = ["frameIdentifier", "speed", "throttle", "steer", "brake", "clutch", "gear", "engineRPM",
+        self.telemetryCols = ["frameIdentifier", "speed", "throttle", "steer", "brake", "clutch", "gear", "engineRPM",
         "drs", "brakesTemperatureRL", "brakesTemperatureRR", "brakesTemperatureFL", "brakesTemperatureFR",
         "tyresSurfaceTemperatureRL", "tyresSurfaceTemperatureRR",
         "tyresSurfaceTemperatureFL", "tyresSurfaceTemperatureFR", "engineTemperature"]
 
-        statusCols = ["frameIdentifier", "fuelMix", "frontBrakeBias", "fuelInTank", "fuelRemainingLaps",
+        self.statusCols = ["frameIdentifier", "fuelMix", "frontBrakeBias", "fuelInTank", "fuelRemainingLaps",
         "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", "actualTyreCompound", "tyresAgeLaps"]
         sessionCols = ['frameIdentifier', 'weather', 'trackTemperature', 'trackLength', 'trackId']
 
-        filterColumns = [motionCols, lapCols, setupCols, telemetryCols, statusCols]
+        self.filterColumns = [self.motionCols, self.lapCols, self.setupCols, self.telemetryCols, self.statusCols]
+
+        self.filteredDF = [pd.DataFrame(columns=cols) for cols in self.filterColumns]
+        print(self.filteredDF)
+    def reader(self):
+        #consider using numpy if this is slow
+
+        for i in range(len(self.files)):
+            with open(self.files[i], 'r') as file:
+                reader = list(csv.reader(file))
+                data = reader[self.previousRows[i]+1:]
+                header = reader[0]
+                self.previousRows[i] = len(list(reader))
+                self.seperateData.append(pd.DataFrame(data, columns = header))
+                
+    def sorter(self):
+
         for i in range(len(self.files)):
             df = self.seperateData[i]
-            self.filteredDF.append(df[filterColumns[i]])
+            print(df[self.filterColumns[i]])
+            self.filteredDF[i] = pd.concat([self.filteredDF[i],df[self.filterColumns[i]]], ignore_index=True)
         self.motion, self.lap, self.setup, self.telemetry, self.status = self.filteredDF
         self.master = self.motion.merge(self.lap, on='frameIdentifier')
-        #self.master = self.master.merger(self.setup, on='frameIdentifier') not using setup in master. Need to create a seperate session and setup live master csv
         self.master = self.master.merge(self.telemetry, on='frameIdentifier')
         self.master = self.master.merge(self.status, on='frameIdentifier')
-        #print(self.master)
-        self.filteredDF = []
         self.seperateData = []
+
     def writer(self):
 
         self.master.to_csv(f'CSV_Data/{self.sessionUID}/master.csv')
+
     def run(self):
+
         logging.info("Master CSV writer thread started")
         while True:
-            self.read()
+            self.reader()
             self.sorter()
             self.writer()
             if self.quitflag == True:
                 break
         logging.info("CSV Writer thread stopped")
+
     def requestQuit(self, *args):
+
         if args:
             self.quitflag = True
-        else:
-            self.quitflag = False
