@@ -438,10 +438,10 @@ class PacketReceiverThread(threading.Thread):
                     csvWriter.write()
 
                     #convert seperate CSV files to master file
-                    masterWriter = masterWriter(self.sessionUID)
-                    masterWriter.read()
-                    masterWriter.sorter()
-                    masterWriter.write()
+                    master_writer = masterWriter(self.sessionUID)
+                    master_writer.read()
+                    master_writer.sorter()
+                    master_writer.writer()
 
 
 

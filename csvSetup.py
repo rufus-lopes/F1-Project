@@ -13,7 +13,7 @@ def setupCSV(_sessionUID):
     _path = os.path.join(parent, dir)
     if not os.path.exists(_path):
         os.mkdir(_path)
-    
+
     motionFileName = f"CSV_Data/{sessionUID}/motion.csv"
     sessionFileName = f"CSV_Data/{sessionUID}/session.csv"
     lapFileName = f"CSV_Data/{sessionUID}/lap.csv"
