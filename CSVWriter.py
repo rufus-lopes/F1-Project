@@ -126,7 +126,6 @@ class masterWriter(threading.Thread):
         self.filterColumns = [self.motionCols, self.lapCols, self.setupCols, self.telemetryCols, self.statusCols]
 
         self.filteredDF = [pd.DataFrame(columns=cols) for cols in self.filterColumns]
-        print(self.filteredDF)
     def reader(self):
         #consider using numpy if this is slow
 
@@ -137,12 +136,11 @@ class masterWriter(threading.Thread):
                 header = reader[0]
                 self.previousRows[i] = len(list(reader))
                 self.seperateData.append(pd.DataFrame(data, columns = header))
-                
+
     def sorter(self):
 
         for i in range(len(self.files)):
             df = self.seperateData[i]
-            print(df[self.filterColumns[i]])
             self.filteredDF[i] = pd.concat([self.filteredDF[i],df[self.filterColumns[i]]], ignore_index=True)
         self.motion, self.lap, self.setup, self.telemetry, self.status = self.filteredDF
         self.master = self.motion.merge(self.lap, on='frameIdentifier')
