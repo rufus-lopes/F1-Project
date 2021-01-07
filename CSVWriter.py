@@ -5,6 +5,7 @@ import csv
 import numpy as np
 import pandas as pd
 from databaseUnpacker import localFormat
+import logging
 
 
 class csvWriter(object):
@@ -82,11 +83,17 @@ class csvWriter(object):
 
 
 
-class masterWriter(object):
+class masterWriter(threading.Thread):
     def __init__(self, _sessionUID):
+        super().__init__(name="masterWriter")
         self.sessionUID = _sessionUID
-        self.files = [f'CSV_Data/{self.sessionUID}/motion.csv', f'CSV_Data/{self.sessionUID}/lap.csv',
-         f'CSV_Data/{self.sessionUID}/setup.csv', f'CSV_Data/{self.sessionUID}/telemetry.csv', f'CSV_Data/{self.sessionUID}/status.csv'] #not including event data in master table
+        self.files = [
+        f'CSV_Data/{self.sessionUID}/motion.csv',
+        f'CSV_Data/{self.sessionUID}/lap.csv',
+        f'CSV_Data/{self.sessionUID}/setup.csv',
+        f'CSV_Data/{self.sessionUID}/telemetry.csv',
+        f'CSV_Data/{self.sessionUID}/status.csv'
+        ] #not including event data in master table
         self.seperateData = []
         self.headers = []
         self.motion = None
@@ -128,14 +135,30 @@ class masterWriter(object):
         sessionCols = ['frameIdentifier', 'weather', 'trackTemperature', 'trackLength', 'trackId']
 
         filterColumns = [motionCols, lapCols, setupCols, telemetryCols, statusCols]
-        for i in range(len(self.seperateData)):
+        for i in range(len(self.files)):
             df = self.seperateData[i]
             self.filteredDF.append(df[filterColumns[i]])
-
         self.motion, self.lap, self.setup, self.telemetry, self.status = self.filteredDF
         self.master = self.motion.merge(self.lap, on='frameIdentifier')
         #self.master = self.master.merger(self.setup, on='frameIdentifier') not using setup in master. Need to create a seperate session and setup live master csv
         self.master = self.master.merge(self.telemetry, on='frameIdentifier')
         self.master = self.master.merge(self.status, on='frameIdentifier')
+        #print(self.master)
+        self.filteredDF = []
+        self.seperateData = []
     def writer(self):
+
         self.master.to_csv(f'CSV_Data/{self.sessionUID}/master.csv')
+    def run(self):
+        logging.info("Master CSV writer thread started")
+        quitflag = False
+        while not quitflag:
+            quitflag = self.requestQuit()
+            self.read()
+            self.sorter()
+            self.writer()
+    def requestQuit(self):
+        if threading.active_count() == 2: #definitely not the best. Try and see if this is last thread or something
+            return True
+        else:
+            return False

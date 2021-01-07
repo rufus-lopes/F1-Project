@@ -377,13 +377,12 @@ class PacketRecorderThread(threading.Thread):
 class PacketReceiverThread(threading.Thread):
     """The PacketReceiverThread receives incoming telemetry packets via the network and passes them to the PacketRecorderThread for storage."""
 
-    def __init__(self, udp_port, recorder_thread, csvWriter_thread, _sessionUID):
+    def __init__(self, udp_port, recorder_thread, csvWriter_thread,):
         super().__init__(name="receiver")
         self._udp_port = udp_port
         self._recorder_thread = recorder_thread
         self._socketpair = socket.socketpair()
         self._csvWriter_thread = csvWriter_thread
-        self.sessionUID = _sessionUID
 
     def close(self):
         for sock in self._socketpair:
@@ -437,11 +436,6 @@ class PacketReceiverThread(threading.Thread):
                     csvWriter.accept_packet(packet)
                     csvWriter.write()
 
-                    #convert seperate CSV files to master file
-                    master_writer = masterWriter(self.sessionUID)
-                    master_writer.read()
-                    master_writer.sorter()
-                    master_writer.writer()
 
 
 
@@ -504,7 +498,10 @@ def main():
 
     csvWriter_thread = csvWriter(_sessionUID)
 
+
+
     # Start recorder thread first, then receiver thread.
+
 
     quit_barrier = Barrier()
 
@@ -512,11 +509,14 @@ def main():
     recorder_thread.start()
 
 
-    receiver_thread = PacketReceiverThread(args.port, recorder_thread, csvWriter_thread, _sessionUID)
+    receiver_thread = PacketReceiverThread(args.port, recorder_thread, csvWriter_thread,)
     receiver_thread.start()
 
     wait_console_thread = WaitConsoleThread(quit_barrier)
     wait_console_thread.start()
+
+    masterWriter_thread = masterWriter(_sessionUID)
+    masterWriter_thread.start()
 
     # Recorder, receiver, and wait_console threads are now active. Run until we're asked to quit.
 
@@ -536,6 +536,8 @@ def main():
     recorder_thread.request_quit()
     recorder_thread.join()
     recorder_thread.close()
+
+    masterWriter_thread.join()
 
     # All done.
     logging.info("Decoding Database")
