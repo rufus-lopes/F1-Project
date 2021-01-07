@@ -11,7 +11,7 @@ from collections import namedtuple
 from os import getcwd
 import os
 from DBExpander import DBExpand
-from values import csvWriter#will need changing at some point
+from CSVWriter import csvWriter, masterWriter
 from datatypes import (
 PacketHeader, PacketID, HeaderFieldsToPacketType)
 from UDP_unpacker import unpackUDPpacket
@@ -377,12 +377,13 @@ class PacketRecorderThread(threading.Thread):
 class PacketReceiverThread(threading.Thread):
     """The PacketReceiverThread receives incoming telemetry packets via the network and passes them to the PacketRecorderThread for storage."""
 
-    def __init__(self, udp_port, recorder_thread, csvWriter_thread):
+    def __init__(self, udp_port, recorder_thread, csvWriter_thread, _sessionUID):
         super().__init__(name="receiver")
         self._udp_port = udp_port
         self._recorder_thread = recorder_thread
         self._socketpair = socket.socketpair()
         self._csvWriter_thread = csvWriter_thread
+        self.sessionUID = _sessionUID
 
     def close(self):
         for sock in self._socketpair:
@@ -431,10 +432,19 @@ class PacketReceiverThread(threading.Thread):
                     timestamped_packet = TimestampedPacket(timestamp, packet)
                     self._recorder_thread.record_packet(timestamped_packet)
 
+                    #real time recording of seperate data to csv files
                     csvWriter = self._csvWriter_thread
                     csvWriter.accept_packet(packet)
                     csvWriter.write()
-                    
+
+                    #convert seperate CSV files to master file
+                    masterWriter = masterWriter(self.sessionUID)
+                    masterWriter.read()
+                    masterWriter.sorter()
+                    masterWriter.write()
+
+
+
                 elif key == key_socketpair:
                     quitflag = True
 
@@ -502,7 +512,7 @@ def main():
     recorder_thread.start()
 
 
-    receiver_thread = PacketReceiverThread(args.port, recorder_thread, csvWriter_thread)
+    receiver_thread = PacketReceiverThread(args.port, recorder_thread, csvWriter_thread, _sessionUID)
     receiver_thread.start()
 
     wait_console_thread = WaitConsoleThread(quit_barrier)
