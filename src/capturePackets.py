@@ -10,19 +10,19 @@ import selectors
 from collections import namedtuple
 from os import getcwd
 import os
-from DBExpander import DBExpand
-from csvWriter import csvWriter, masterWriter
-from datatypes import (
+from src.DBExpander import DBExpand
+from src.csvWriter import csvWriter, masterWriter
+from src.datatypes import (
 PacketHeader, PacketID, HeaderFieldsToPacketType)
-from UDP_unpacker import unpackUDPpacket
+from src.UDP_unpacker import unpackUDPpacket
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.express as px
 import pandas as pd
 import csv
-from threading_utils import WaitConsoleThread, Barrier
-from csvSetup import setupCSV, getSessionInfo
+from src.threading_utils import WaitConsoleThread, Barrier
+from src.csvSetup import setupCSV, getSessionInfo
 
 
 
@@ -84,7 +84,7 @@ class PacketRecorder:
     def _open_database(self, sessionUID: str):
         """Open SQLite3 database file and make sure it has the correct schema."""
         assert self._conn is None
-        filename = f"../SQL_Data/F1_2020_{sessionUID}.sqlite3"
+        filename = f"SQL_Data/F1_2020_{sessionUID}.sqlite3"
         logging.info("Opening file %s", filename)
         conn = sqlite3.connect(filename)
         cursor = conn.cursor()
@@ -543,14 +543,14 @@ def capturePackets():
     # All done.
     logging.info("Decoding Database")
     database = findFile()
-    database = "../SQL_Data/" + database
+    database = "SQL_Data/" + database
     DBExpand(database)
     logging.info("All done.")
 
 
 
 def findFile():
-    os.chdir("../SQL_Data")
+    os.chdir("SQL_Data")
     files = os.listdir()
     sqliteFiles = []
 
@@ -558,6 +558,6 @@ def findFile():
         if files[i].endswith("sqlite3"):
             sqliteFiles.append(files[i])
     sorted_by_mtime_desc = sorted(sqliteFiles, key=lambda t: -os.stat(t).st_mtime)
-    os.chdir("../src")
+    os.chdir("..")
 
     return sorted_by_mtime_desc[0]

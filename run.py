@@ -1,4 +1,4 @@
-from capturePackets import capturePackets
+from src.capturePackets import capturePackets
 
-if __name__ = '__main__':
+if __name__ == '__main__':
     capturePackets()

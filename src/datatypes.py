@@ -1,7 +1,7 @@
 import enum
 import ctypes
 from typing import Dict
-from packedLittleEndian import PackedLittleEndianStructure
+from src.packedLittleEndian import PackedLittleEndianStructure
 
 
 class PacketHeader(PackedLittleEndianStructure):

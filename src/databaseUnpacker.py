@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from datatypes import *
+from src.datatypes import *
 import ctypes
 
 class localFormat(object):
