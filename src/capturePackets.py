@@ -456,7 +456,7 @@ class PacketReceiverThread(threading.Thread):
         self._socketpair[1].send(b"\x00")
 
 
-def main():
+def capturePackets():
     """Record incoming telemetry data until the user presses enter."""
 
     # Configure logging.
@@ -561,7 +561,3 @@ def findFile():
     os.chdir("../src")
 
     return sorted_by_mtime_desc[0]
-
-
-if __name__ == "__main__":
-    main()
