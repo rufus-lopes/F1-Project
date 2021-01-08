@@ -1,8 +1,28 @@
+import numpy as np
 import pandas as pd
+import csv
+import logging
+import socket
+import os
+from UDP_unpacker import unpackUDPpacket
 
+def setupCSV(_sessionUID):
+    sessionUID = _sessionUID
+    parent = os.getcwd()
+    dir = f"CSV_Data/{sessionUID}"
+    _path = os.path.join(parent, dir)
+    if not os.path.exists(_path):
+        os.mkdir(_path)
 
-def addColumnNames(motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF, carStatusDF):
-    """adds column names to data frames """
+    motionFileName = f"CSV_Data/{sessionUID}/motion.csv"
+    sessionFileName = f"CSV_Data/{sessionUID}/session.csv"
+    lapFileName = f"CSV_Data/{sessionUID}/lap.csv"
+    eventFileName = f"CSV_Data/{sessionUID}/event.csv"
+    setupFileName = f"CSV_Data/{sessionUID}/setup.csv"
+    telemetryFileName = f"CSV_Data/{sessionUID}/telemetry.csv"
+    statusFileName = f"CSV_Data/{sessionUID}/status.csv"
+
+    fileNames = [motionFileName, sessionFileName, lapFileName, eventFileName, setupFileName, telemetryFileName, statusFileName]
 
     motionCols = ["frameIdentifier", "SessionTime", "worldPositionX", "worldPositionY", "worldPositionZ", "worldVelocityX", "worldVelocityY",
     "worldVelocityZ","worldForwardDirX", "worldForwardDirY", "worldForwardDirZ", "worldRightDirX", "worldRightDirY",
@@ -51,15 +71,27 @@ def addColumnNames(motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTele
      "drsFault", "engineDamage", "gearBoxDamage", "vehicleFiaFlags", "ersStoreEnergy", "ersDeployMode",
      "ersHarvestedThisLapMGUK", "ersHarvestedThisLapMGUH", "ersDeployedThisLap"]
 
+    columnNames = [motionCols, sessionCols, lapDataCols, eventCols, carSetupsCols, carTelemetryCols, carStatusCols]
 
-    motionDF.columns = motionCols
-    sessionDF.columns = sessionCols
-    lapDataDF.columns = lapDataCols
-    carSetupsDF.columns = carSetupsCols
-    carTelemetryDF.columns = carTelemetryCols
-    carStatusDF.columns = carStatusCols
+    for i in range(len(columnNames)):
+        file = fileNames[i]
+        col = columnNames[i]
+        with open(file, 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(col)
 
-    if not eventDF.empty:
-        eventDF.columns = eventCols
+def getSessionInfo():
+    """Captures the first packet of the session and uses this for basic information regarding
+    visualiser setup"""
 
-    return motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF, carStatusDF
+    UDP_IP = "0.0.0.0"
+    UDP_PORT = 20777
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((UDP_IP, UDP_PORT))
+    logging.info("Waiting for session to start")
+    while True:
+        data, addr = sock.recvfrom(2048)
+        if data:
+            break
+
+    return unpackUDPpacket(data)

@@ -44,7 +44,7 @@ def main():
     lapTimesDf = getLapTimes(connection)
     lapTimesDf = addNames(lapTimesDf)
     lapTimesDf = finalLapTime(lapTimesDf)
-    masterLapTimeDfVars = ["SessionTime_s", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum", "finalLapTime"]
+    masterLapTimeDfVars = ["SessionTime_s", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum", "finalLapTime"] #add currentlapdistance to this
     masterLapTimeDf = lapTimesDf[masterLapTimeDfVars]
     print(masterLapTimeDf.head())
 
