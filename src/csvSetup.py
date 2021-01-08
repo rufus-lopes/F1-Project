@@ -14,13 +14,13 @@ def setupCSV(_sessionUID):
     if not os.path.exists(_path):
         os.mkdir(_path)
 
-    motionFileName = f"CSV_Data/{sessionUID}/motion.csv"
-    sessionFileName = f"CSV_Data/{sessionUID}/session.csv"
-    lapFileName = f"CSV_Data/{sessionUID}/lap.csv"
-    eventFileName = f"CSV_Data/{sessionUID}/event.csv"
-    setupFileName = f"CSV_Data/{sessionUID}/setup.csv"
-    telemetryFileName = f"CSV_Data/{sessionUID}/telemetry.csv"
-    statusFileName = f"CSV_Data/{sessionUID}/status.csv"
+    motionFileName = f"../CSV_Data/{sessionUID}/motion.csv"
+    sessionFileName = f"../CSV_Data/{sessionUID}/session.csv"
+    lapFileName = f"../CSV_Data/{sessionUID}/lap.csv"
+    eventFileName = f"../CSV_Data/{sessionUID}/event.csv"
+    setupFileName = f"../CSV_Data/{sessionUID}/setup.csv"
+    telemetryFileName = f"../CSV_Data/{sessionUID}/telemetry.csv"
+    statusFileName = f"../CSV_Data/{sessionUID}/status.csv"
 
     fileNames = [motionFileName, sessionFileName, lapFileName, eventFileName, setupFileName, telemetryFileName, statusFileName]
 

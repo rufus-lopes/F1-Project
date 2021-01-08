@@ -31,26 +31,26 @@ class csvWriter(object):
         #         writer.writerow(data)
     def motion(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{self.sessionUID}/motion.csv"
+        fileName = f"../CSV_Data/{self.sessionUID}/motion.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
 
     def session(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{self.sessionUID}/session.csv"
+        fileName = f"../CSV_Data/{self.sessionUID}/session.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
     def lap(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{self.sessionUID}/lap.csv"
+        fileName = f"../CSV_Data/{self.sessionUID}/lap.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
     def event(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{self.sessionUID}/event.csv"
+        fileName = f"../CSV_Data/{self.sessionUID}/event.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
@@ -58,19 +58,19 @@ class csvWriter(object):
         pass
     def setup(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{self.sessionUID}/setup.csv"
+        fileName = f"../CSV_Data/{self.sessionUID}/setup.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
     def telemetry(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{self.sessionUID}/telemetry.csv"
+        fileName = f"../CSV_Data/{self.sessionUID}/telemetry.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
     def status(self):
         data = localFormat(self.unpacked, self.type).arr
-        fileName = f"CSV_Data/{self.sessionUID}/status.csv"
+        fileName = f"../CSV_Data/{self.sessionUID}/status.csv"
         with open(fileName, 'a') as file:
             writer = csv.writer(file)
             writer.writerow(data)
@@ -84,11 +84,11 @@ class masterWriter(threading.Thread):
         super().__init__(name="CSVWriter")
         self.sessionUID = _sessionUID
         self.files = [
-        f'CSV_Data/{self.sessionUID}/motion.csv',
-        f'CSV_Data/{self.sessionUID}/lap.csv',
-        f'CSV_Data/{self.sessionUID}/setup.csv',
-        f'CSV_Data/{self.sessionUID}/telemetry.csv',
-        f'CSV_Data/{self.sessionUID}/status.csv'
+        f'../CSV_Data/{self.sessionUID}/motion.csv',
+        f'../CSV_Data/{self.sessionUID}/lap.csv',
+        f'../CSV_Data/{self.sessionUID}/setup.csv',
+        f'../CSV_Data/{self.sessionUID}/telemetry.csv',
+        f'../CSV_Data/{self.sessionUID}/status.csv'
         ] #not including event data in master table
         self.seperateData = []
         self.previousRows = [0]*5
@@ -150,7 +150,7 @@ class masterWriter(threading.Thread):
 
     def writer(self):
 
-        self.master.to_csv(f'CSV_Data/{self.sessionUID}/master.csv')
+        self.master.to_csv(f'../CSV_Data/{self.sessionUID}/master.csv')
 
     def run(self):
 
