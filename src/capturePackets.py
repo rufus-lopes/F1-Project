@@ -10,19 +10,19 @@ import selectors
 from collections import namedtuple
 from os import getcwd
 import os
-from DBExpander import DBExpand
-from CSVWriter import csvWriter, masterWriter
-from datatypes import (
+from src.DBExpander import DBExpand
+from src.csvWriter import csvWriter, masterWriter
+from src.datatypes import (
 PacketHeader, PacketID, HeaderFieldsToPacketType)
-from UDP_unpacker import unpackUDPpacket
+from src.UDP_unpacker import unpackUDPpacket
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.express as px
 import pandas as pd
 import csv
-from threading_utils import WaitConsoleThread, Barrier
-from csvSetup import setupCSV, getSessionInfo
+from src.threading_utils import WaitConsoleThread, Barrier
+from src.csvSetup import setupCSV, getSessionInfo
 
 
 
@@ -438,9 +438,6 @@ class PacketReceiverThread(threading.Thread):
                     csvWriter.accept_packet(packet)
                     csvWriter.write()
 
-
-
-
                 elif key == key_socketpair:
                     quitflag = True
 
@@ -459,7 +456,7 @@ class PacketReceiverThread(threading.Thread):
         self._socketpair[1].send(b"\x00")
 
 
-def main():
+def capturePackets():
     """Record incoming telemetry data until the user presses enter."""
 
     # Configure logging.
@@ -564,7 +561,3 @@ def findFile():
     os.chdir("..")
 
     return sorted_by_mtime_desc[0]
-
-
-if __name__ == "__main__":
-    main()

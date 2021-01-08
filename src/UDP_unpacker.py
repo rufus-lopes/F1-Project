@@ -1,8 +1,8 @@
 import socket
 import enum
 import ctypes
-from packedLittleEndian import PackedLittleEndianStructure
-from datatypes import *
+from src.packedLittleEndian import PackedLittleEndianStructure
+from src.datatypes import *
 
 def unpackUDPpacket(packet: bytes):
     """unpacks the UDP packet from binary format to corresponding class in datatypes.
@@ -13,7 +13,7 @@ def unpackUDPpacket(packet: bytes):
     key = (header.packetFormat, header.packetVersion, header.packetId)
     packet_type = HeaderFieldsToPacketType[key]
     header_size = ctypes.sizeof(PacketHeader)
-    
+
     if actual_packet_size < header_size:
         raise UnpackError(
             f"Bad telemetry packet: too short ({actual_packet_size} bytes)."

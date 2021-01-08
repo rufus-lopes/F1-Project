@@ -1,18 +1,18 @@
 import sqlite3
 import pandas as pd
 import struct
-from datatypes import PacketID, EventStringCode
-from UDP_unpacker import unpackUDPpacket
+from src.datatypes import PacketID, EventStringCode
+from src.UDP_unpacker import unpackUDPpacket
 import os
 import inspect
 import ctypes
-from databaseUnpacker import localFormat
+from src.databaseUnpacker import localFormat
 import warnings
 import numpy as np
 import matplotlib
-from addColumnNames import addColumnNames
+from src.addColumnNames import addColumnNames
 import logging
-from times import *
+from src.times import *
 
 warnings.filterwarnings("ignore")
 
