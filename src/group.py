@@ -9,7 +9,7 @@ import os
 #model would have to be able to predict final value based on half-full dataframe when in operation - is this possible?
 
 
-os.chdir("SQL_Data")
+os.chdir("../SQL_Data")
 conn = sqlite3.connect("F1_2020_1a3b7c8065834b0d.sqlite3")
 cur = conn.cursor()
 cur.execute("SELECT * FROM MasterData")
@@ -27,5 +27,3 @@ for l in groupNames:
 lapData[0].reset_index(drop=True, inplace=True)
 
 print(lapData[0].head())
-conn2 = sqlite3.connect("groupTest.sqlite3")
-lapData[0].to_sql("group", con = conn2, schema = None, if_exists = 'replace' )

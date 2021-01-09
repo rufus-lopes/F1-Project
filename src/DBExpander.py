@@ -13,6 +13,7 @@ import matplotlib
 from src.addColumnNames import addColumnNames
 import logging
 from src.times import *
+from src.averages import trainingCalculations
 
 warnings.filterwarnings("ignore")
 
@@ -105,7 +106,7 @@ def masterLapData(connection):
     lapTimesDf = getLapTimes(connection)
     lapTimesDf = addNames(lapTimesDf)
     lapTimesDf = finalLapTime(lapTimesDf)
-    masterLapDataDfVars = ["frameIdentifier", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum", "finalLapTime"]
+    masterLapDataDfVars = ["frameIdentifier", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum", "finalLapTime", "lapDistance"]
     masterLapDataDf = lapTimesDf[masterLapDataDfVars]
     return masterLapDataDf
 
@@ -222,6 +223,7 @@ def DBExpand(database):
     Tables(motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF, carStatusDF, conn)
     masterDf, masterSetupDf = masterData(conn)
     masterDfToSQL(masterDf, masterSetupDf, conn)
+    trainingCalculations(database)
     conn.close()
     # except:
     #     logging.info("Error: Database does not exist")
