@@ -9,7 +9,6 @@ from src.UDP_unpacker import unpackUDPpacket
 def setupCSV(_sessionUID):
     sessionUID = _sessionUID
     parent = os.getcwd()
-    print(os.listdir())
     dir = f"CSV_Data/{sessionUID}"
     _path = os.path.join(parent, dir)
     if not os.path.exists(_path):

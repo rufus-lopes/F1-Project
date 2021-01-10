@@ -64,7 +64,7 @@ def trainingCalculations(db):
         averagedData.append(averages(d, timeStep))
 
     fullAveragedData = pd.concat(averagedData)
-    fullAveragedData.drop(['pkt_id', 'packetId', 'sessionTime', 'frameIdentifier'], inplace=True)
+    # fullAveragedData.drop(['pkt_id', 'packetId', 'sessionTime', 'frameIdentifier'], inplace=True)
 
     summedData = []
     for i in data:

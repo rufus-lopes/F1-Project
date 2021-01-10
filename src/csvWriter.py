@@ -7,6 +7,7 @@ import pandas as pd
 from src.databaseUnpacker import localFormat
 import logging
 import ctypes
+import time
 
 class csvWriter(object):
     def __init__(self, _sessionUID):
@@ -134,7 +135,7 @@ class masterWriter(threading.Thread):
                 reader = list(csv.reader(file))
                 data = reader[self.previousRows[i]+1:]
                 header = reader[0]
-                self.previousRows[i] = len(list(reader))
+                self.previousRows[i] = len(reader)
                 self.seperateData.append(pd.DataFrame(data, columns = header))
 
     def sorter(self):
@@ -156,12 +157,15 @@ class masterWriter(threading.Thread):
 
         logging.info("Master CSV writer thread started")
         while True:
+    
             self.reader()
             self.sorter()
             self.writer()
             if self.quitflag == True:
                 break
+
         logging.info("CSV Writer thread stopped")
+
 
     def requestQuit(self, *args):
 

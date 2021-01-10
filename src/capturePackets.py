@@ -23,6 +23,7 @@ import pandas as pd
 import csv
 from src.threading_utils import WaitConsoleThread, Barrier
 from src.csvSetup import setupCSV, getSessionInfo
+from src.live import mainData, mainWriter
 
 
 
@@ -379,12 +380,13 @@ class PacketRecorderThread(threading.Thread):
 class PacketReceiverThread(threading.Thread):
     """The PacketReceiverThread receives incoming telemetry packets via the network and passes them to the PacketRecorderThread for storage."""
 
-    def __init__(self, udp_port, recorder_thread, csvWriter_thread,):
+    def __init__(self, udp_port, recorder_thread, csvWriter_thread, _mainData):
         super().__init__(name="receiver")
         self._udp_port = udp_port
         self._recorder_thread = recorder_thread
         self._socketpair = socket.socketpair()
         self._csvWriter_thread = csvWriter_thread
+        self.mainData = _mainData
 
     def close(self):
         for sock in self._socketpair:
@@ -434,9 +436,13 @@ class PacketReceiverThread(threading.Thread):
                     self._recorder_thread.record_packet(timestamped_packet)
 
                     #real time recording of seperate data to csv files
-                    csvWriter = self._csvWriter_thread
-                    csvWriter.accept_packet(packet)
-                    csvWriter.write()
+                    # csvWriter = self._csvWriter_thread
+                    # csvWriter.accept_packet(packet)
+                    # csvWriter.write()
+
+                    writer = self.mainData
+                    writer.accept_packet(packet)
+
 
                 elif key == key_socketpair:
                     quitflag = True
@@ -474,7 +480,7 @@ def capturePackets():
     )
     setupPacket = getSessionInfo()
     _sessionUID = f"{setupPacket.header.sessionUID:016x}"
-    setupCSV(_sessionUID)
+    # setupCSV(_sessionUID)
 
     parser.add_argument(
         "-p",
@@ -497,7 +503,7 @@ def capturePackets():
 
     csvWriter_thread = csvWriter(_sessionUID)
 
-
+    main_data = mainData()
 
     # Start recorder thread first, then receiver thread.
 
@@ -508,14 +514,17 @@ def capturePackets():
     recorder_thread.start()
 
 
-    receiver_thread = PacketReceiverThread(args.port, recorder_thread, csvWriter_thread,)
+    receiver_thread = PacketReceiverThread(args.port, recorder_thread, csvWriter_thread, main_data)
     receiver_thread.start()
 
     wait_console_thread = WaitConsoleThread(quit_barrier)
     wait_console_thread.start()
 
-    masterWriter_thread = masterWriter(_sessionUID)
-    masterWriter_thread.start()
+    # masterWriter_thread = masterWriter(_sessionUID)
+    # masterWriter_thread.start()
+
+    mainWriter_thread = mainWriter(main_data)
+    mainWriter_thread.start()
 
     # Recorder, receiver, and wait_console threads are now active. Run until we're asked to quit.
 
@@ -537,8 +546,11 @@ def capturePackets():
     recorder_thread.join()
     recorder_thread.close()
 
-    masterWriter_thread.requestQuit(True)
-    masterWriter_thread.join()
+    # masterWriter_thread.requestQuit(True)
+    # masterWriter_thread.join()
+    mainWriter_thread.requestQuit()
+    mainWriter_thread.join()
+
 
     # All done.
     logging.info("Decoding Database")
