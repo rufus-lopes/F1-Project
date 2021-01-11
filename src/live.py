@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from src.UDP_unpacker import unpackUDPpacket
 from src.databaseUnpacker import localFormat
-from src.addLiveNames import addLiveNames
 import time
 
 class mainData(object):
@@ -56,17 +55,16 @@ class mainData(object):
         return self.statusData
 
 
-class mainWriter(threading.Thread):
+class liveMerged(threading.Thread):
     def __init__(self, main_Data):
-        super().__init__(name = 'master')
-        self.motion = []
-        self.session = []
-        self.lap = []
-        self.setup = []
-        self.telemetry = []
-        self.status = []
+        super().__init__(name = 'live_merge')
+        self.motion = pd.DataFrame()
+        self.session = pd.DataFrame()
+        self.lap = pd.DataFrame()
+        self.setup = pd.DataFrame()
+        self.telemetry = pd.DataFrame()
+        self.status = pd.DataFrame()
         self.previousIndex = [0]*6
-        self.data = []
         self.main = pd.DataFrame()
 
         self.set = False
@@ -136,7 +134,7 @@ class mainWriter(threading.Thread):
         "tyresSurfaceTemperatureRL", "tyresSurfaceTemperatureRR",
         "tyresSurfaceTemperatureFL", "tyresSurfaceTemperatureFR", "engineTemperature"]
 
-        self.masterStatus = ["frameIdentifier", "fuelMix", "FrontBrakeBias", "fuelInTank", "fuelRemainingLaps",
+        self.masterStatus = ["frameIdentifier", "fuelMix", "frontBrakeBias", "fuelInTank", "fuelRemainingLaps",
         "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", "actualTyreCompound", "tyresAgeLaps"]
 
         self.finalCols = None
@@ -177,7 +175,7 @@ class mainWriter(threading.Thread):
             self.previousIndex[5] = self.previousIndex[5] + len(self.status.index)
 
     def merge(self):
-        if self.data:
+        if not self.motion.empty:
             self.main = self.motion.merge(self.lap, on='frameIdentifier')
             self.main = self.main.merge(self.telemetry, on='frameIdentifier')
             self.main = self.main.merge(self.status, on='frameIdentifier')
@@ -186,15 +184,16 @@ class mainWriter(threading.Thread):
                 self.final = pd.DataFrame(columns = self.finalColumns)
                 self.set = True
     def concat(self):
-        self.final = pd.concat([self.final, self.main])
+        if not self.main.empty:
+            self.final = pd.concat([self.final, self.main]).reset_index(drop=True)
+            self.final = self.final.sort_values(by=['frameIdentifier'])
+
     def run(self):
         while not self.quitflag:
             self.getData()
             self.merge()
             self.concat()
-            time.sleep(3)
         print(self.final.info(verbose=True))
         print(self.final)
-        self.final.to_csv('CSV_Data/test.csv')
     def requestQuit(self):
         self.quitflag = True
