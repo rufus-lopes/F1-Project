@@ -485,6 +485,11 @@ def capturePackets():
         dest="interval",
     )
 
+    if not os.path.exists('SQL_Data'):
+        os.makedirs('SQL_Data')
+    if not os.path.exists('CSV_Data'):
+        os.makedirs('CSV_Data')
+
     args = parser.parse_args()
 
     main_data = mainData() #initialise an instance of main_Data

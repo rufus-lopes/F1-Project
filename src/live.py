@@ -153,12 +153,12 @@ class liveMerged(threading.Thread):
         status = list(main_data.getStatus())
 
         if motion:
-            self.motion = pd.DataFrame(motion[self.previousIndex[0]:], columns = self.motionCols)
-            self.session = pd.DataFrame(session[self.previousIndex[1]:], columns = self.sessionCols)
-            self.lap = pd.DataFrame(lap[self.previousIndex[2]:], columns = self.lapDataCols)
-            self.setup = pd.DataFrame(setup[self.previousIndex[3]:], columns = self.carSetupsCols)
-            self.telemetry = pd.DataFrame(telemetry[self.previousIndex[4]:], columns = self.carTelemetryCols)
-            self.status = pd.DataFrame(status[self.previousIndex[5]:], columns = self.carStatusCols)
+            self.motion = pd.DataFrame(motion[self.previousIndex[0]+1:], columns = self.motionCols)
+            self.session = pd.DataFrame(session[self.previousIndex[1]+1:], columns = self.sessionCols)
+            self.lap = pd.DataFrame(lap[self.previousIndex[2]+1:], columns = self.lapDataCols)
+            self.setup = pd.DataFrame(setup[self.previousIndex[3]+1:], columns = self.carSetupsCols)
+            self.telemetry = pd.DataFrame(telemetry[self.previousIndex[4]+1:], columns = self.carTelemetryCols)
+            self.status = pd.DataFrame(status[self.previousIndex[5]+1:], columns = self.carStatusCols)
 
             self.motion = self.motion[self.masterMotion]
             self.session = self.session[self.masterSession]
