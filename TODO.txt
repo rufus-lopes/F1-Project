@@ -1,9 +1,11 @@
 rolling average:
 
-choose a good time/packet gap to get the average over
-
-calculate averages and append them to new dataframe --> can probably just add another function to DB expander for this.
 
 CSV writer would need some modification --> if calculation heavy then perhaps needs another thread to handle computation (averages and total)
 
+^CSV writer is too slow. fix the dataframe error so that the data is loaded into memory just-in-time. 
+
+
 otherwise average implementation seems relatively simply?  
+
+
