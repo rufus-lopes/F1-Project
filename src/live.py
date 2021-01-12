@@ -141,7 +141,7 @@ class liveMerged(threading.Thread):
         self.finalCols = None
 
 
-        self.final = pd.DataFrame
+        self.final = pd.DataFrame()
 
 
     def getData(self):

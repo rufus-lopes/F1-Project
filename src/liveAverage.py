@@ -36,6 +36,7 @@ class liveAverage(threading.Thread):
             self.merged = fullQ[-1]
         if self.merged is self.DONE:
             self.q.task_done()
+            self.merged = pd.DataFrame()
     def averager(self):
         if not self.merged.empty:
             self.roll = self.merged.rolling(self.timeStep, min_periods=1).mean()
@@ -49,14 +50,12 @@ class liveAverage(threading.Thread):
             self.input = pd.concat([self.roll, self.sum], axis=1)
     def run(self):
         while not self.quitflag:
-            # t = time()
             self.reader()
             self.averager()
             self.summer()
             self.writer()
-            # t2 = time() - t
-            # print('averger time: ', t2)
-        self.q.task_done()
+
+        # self.q.task_done()
 
         print(self.input.info())
         print(self.input)
