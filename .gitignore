@@ -3,4 +3,4 @@ SQL_Data/
 __pycache__/
 .DS_Store
 CSV_Data/
-oldfiles/
+dep/
