@@ -15,7 +15,8 @@ from src.datatypes import (PacketHeader, PacketID, HeaderFieldsToPacketType)
 from src.UDP_unpacker import unpackUDPpacket
 from src.threading_utils import WaitConsoleThread, Barrier
 from src.live import mainData, liveMerged
-
+from src.liveAverage import liveAverage
+from queue import Queue
 
 
 TimestampedPacket = namedtuple("TimestampedPacket", "timestamp, packet")
@@ -498,6 +499,8 @@ def capturePackets():
 
     quit_barrier = Barrier()
 
+    q = Queue() # used to send data from merged to liveAverage
+
     recorder_thread = PacketRecorderThread(args.interval)
     recorder_thread.start()
 
@@ -507,10 +510,13 @@ def capturePackets():
 
     wait_console_thread = WaitConsoleThread(quit_barrier)
     wait_console_thread.start()
+    DONE = object()
 
-
-    liveMerged_thread = liveMerged(main_data)
+    liveMerged_thread = liveMerged(main_data,q, DONE)
     liveMerged_thread.start()
+
+    liveAverage_thread = liveAverage(q, DONE)
+    liveAverage_thread.start()
 
     # Recorder, receiver, and wait_console threads are now active. Run until we're asked to quit.
 
@@ -518,7 +524,6 @@ def capturePackets():
     quit_barrier.wait()
 
     # Stop threads.
-
 
     wait_console_thread.request_quit()
     wait_console_thread.join()
@@ -535,6 +540,8 @@ def capturePackets():
     liveMerged_thread.requestQuit()
     liveMerged_thread.join()
 
+    liveAverage_thread.requestQuit()
+    liveAverage_thread.join()
 
     # All done.
     logging.info("Decoding Database")

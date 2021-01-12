@@ -56,7 +56,7 @@ class mainData(object):
 
 
 class liveMerged(threading.Thread):
-    def __init__(self, main_Data):
+    def __init__(self, main_Data, q, DONE):
         super().__init__(name = 'live_merge')
         self.motion = pd.DataFrame()
         self.session = pd.DataFrame()
@@ -66,7 +66,8 @@ class liveMerged(threading.Thread):
         self.status = pd.DataFrame()
         self.previousIndex = [0]*6
         self.main = pd.DataFrame()
-
+        self.q = q
+        self.DONE = DONE
         self.set = False
         self.quitflag = False
         self.mainData = main_Data
@@ -140,7 +141,7 @@ class liveMerged(threading.Thread):
         self.finalCols = None
 
 
-        self.final = None
+        self.final = pd.DataFrame
 
 
     def getData(self):
@@ -187,13 +188,25 @@ class liveMerged(threading.Thread):
         if not self.main.empty:
             self.final = pd.concat([self.final, self.main]).reset_index(drop=True)
             self.final = self.final.sort_values(by=['frameIdentifier'])
-
+    def isChanged(self):
+        '''resets the dataframe every lap'''
+        if not self.final.empty:
+            isLapChanged = (self.final["currentLapNum"].shift(1, fill_value=self.final["currentLapNum"].head(1)) != self.final["currentLapNum"]).to_numpy()
+            if True in isLapChanged:
+                self.final = pd.DataFrame(columns = self.finalColumns)
     def run(self):
         while not self.quitflag:
             self.getData()
             self.merge()
             self.concat()
+            self.isChanged()
+            if not self.final.empty:
+                self.q.put(self.final)
+
+
+        self.q.put(self.DONE)
         print(self.final.info(verbose=True))
-        print(self.final)
+        print('Number of motion packets: ', len(self.mainData.getMotion()))
+        # print(self.final)
     def requestQuit(self):
         self.quitflag = True
