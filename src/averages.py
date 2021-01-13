@@ -43,6 +43,20 @@ def selectSumColumns(df, columnsToSum):
 def toSQL(df, conn):
     df.to_sql('TrainingData', con = conn, schema = None, if_exists = 'replace')
 
+def checkFullLap(df):
+    g = df.groupby('currentLapNum')
+    groupNames = list(g.groups)
+    data = []
+    for n in groupNames:
+        lap = g.get_group(n)
+        finalTime = lap['finalLapTime'].to_numpy()
+        if finalTime[0] > 40:
+            data.append(lap)
+    if data:
+        return pd.concat(data)
+
+
+
 def trainingCalculations(db):
 
     columnsToSum = [
@@ -79,5 +93,7 @@ def trainingCalculations(db):
     fullSummedData.columns = sumNames
 
     finalData = pd.concat([fullAveragedData, fullSummedData], axis = 1, ignore_index=False)
+
+    finalData = checkFullLap(finalData)
 
     toSQL(finalData, conn)

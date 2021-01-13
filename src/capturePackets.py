@@ -77,7 +77,7 @@ class PacketRecorder:
     def _open_database(self, sessionUID: str):
         """Open SQLite3 database file and make sure it has the correct schema."""
         assert self._conn is None
-        filename = f"SQL_Data/F1_2020_{sessionUID}.sqlite3"
+        filename = f"SQL_Data/constant_setup/F1_2020_{sessionUID}.sqlite3"
         logging.info("Opening file %s", filename)
         conn = sqlite3.connect(filename)
         cursor = conn.cursor()
@@ -488,8 +488,11 @@ def capturePackets():
 
     if not os.path.exists('SQL_Data'):
         os.makedirs('SQL_Data')
+    if not os.path.exists('SQL_Data/constant_setup'):
+        os.makedirs('SQL_Data/constant_setup')
     if not os.path.exists('CSV_Data'):
         os.makedirs('CSV_Data')
+
 
     args = parser.parse_args()
 
@@ -500,6 +503,7 @@ def capturePackets():
     quit_barrier = Barrier()
 
     q = Queue() # used to send data from merged to liveAverage
+    DONE = object() # quit sentinel for Queue
 
     recorder_thread = PacketRecorderThread(args.interval)
     recorder_thread.start()
@@ -510,7 +514,7 @@ def capturePackets():
 
     wait_console_thread = WaitConsoleThread(quit_barrier)
     wait_console_thread.start()
-    DONE = object()
+
 
     liveMerged_thread = liveMerged(main_data,q, DONE)
     liveMerged_thread.start()
@@ -546,21 +550,25 @@ def capturePackets():
     # All done.
     logging.info("Decoding Database")
     database = findFile()
-    database = "SQL_Data/" + database
-    DBExpand(database)
+    if database:
+        database = "constant_setup/" + database
+        DBExpand(database)
+    else:
+        logging.info('No database exists')
     logging.info("All done.")
 
 
 
 def findFile():
-    os.chdir("SQL_Data")
+    os.chdir("SQL_Data/constant_setup")
     files = os.listdir()
     sqliteFiles = []
-
     for i in range(len(files)):
         if files[i].endswith("sqlite3"):
             sqliteFiles.append(files[i])
     sorted_by_mtime_desc = sorted(sqliteFiles, key=lambda t: -os.stat(t).st_mtime)
     os.chdir("..")
-
-    return sorted_by_mtime_desc[0]
+    if sorted_by_mtime_desc:
+        return sorted_by_mtime_desc[0]
+    else:
+        return False

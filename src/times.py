@@ -33,7 +33,7 @@ def finalLapTime(df):
         nextLap = lapNums[i+1]
         if currentLap != nextLap:
             newLapIndex.append(i)
-    newLapIndex.append(i)
+    newLapIndex.append(i+1)
     finalLapTimes = {lap:time for (lap,time) in zip(lapNums[newLapIndex],lapTimes[newLapIndex])}
     df["finalLapTime"] = [finalLapTimes[lap] for lap in lapNums]
     return df

@@ -91,13 +91,13 @@ def globalFormater(df):
     return motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF, carStatusDF
 
 def Tables(motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF, carStatusDF, conn):
-    motionDF.to_sql("motionData", con = conn, schema=None, if_exists='replace')
-    lapDataDF.to_sql("LapData", con = conn, schema=None, if_exists='replace')
-    eventDF.to_sql("EventData", con = conn, schema=None, if_exists='replace')
-    carSetupsDF.to_sql("CarSetupData", con = conn, schema=None, if_exists='replace')
-    carTelemetryDF.to_sql("TelemetryData", con = conn, schema=None, if_exists='replace')
-    carStatusDF.to_sql("CarStatusData", con = conn, schema=None, if_exists='replace')
-    sessionDF.to_sql("SessionData", con=conn, schema=None, if_exists='replace')
+    motionDF.to_sql("motionData", con = conn, schema=None, if_exists="replace")
+    lapDataDF.to_sql("LapData", con = conn, schema=None, if_exists="replace")
+    eventDF.to_sql("EventData", con = conn, schema=None, if_exists="replace")
+    carSetupsDF.to_sql("CarSetupData", con = conn, schema=None, if_exists="replace")
+    carTelemetryDF.to_sql("TelemetryData", con = conn, schema=None, if_exists="replace")
+    carStatusDF.to_sql("CarStatusData", con = conn, schema=None, if_exists="replace")
+    sessionDF.to_sql("SessionData", con=conn, schema=None, if_exists="replace")
 
 
 
@@ -106,7 +106,7 @@ def masterLapData(connection):
     lapTimesDf = getLapTimes(connection)
     lapTimesDf = addNames(lapTimesDf)
     lapTimesDf = finalLapTime(lapTimesDf)
-    masterLapDataDfVars = ["frameIdentifier", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum", "finalLapTime", "lapDistance"]
+    masterLapDataDfVars = ["frameIdentifier", "lastLapTime", "currentLapTime", "bestLapTime", "currentLapNum", "finalLapTime", "lapDistance", "carPosition"]
     masterLapDataDf = lapTimesDf[masterLapDataDfVars]
     return masterLapDataDf
 
@@ -137,6 +137,7 @@ def masterTelemetryData(connection):
      drs, brakesTemperatureRL, brakesTemperatureRR, brakesTemperatureFL, brakesTemperatureFR,
      tyresSurfaceTemperatureRL, tyresSurfaceTemperatureRR, tyresSurfaceTemperatureFL,
      tyresSurfaceTemperatureFR, engineTemperature FROM telemetryData""")
+
     masterTelemetryDf = pd.DataFrame(cur.fetchall())
     telemetryCols = ["frameIdentifier", "speed", "throttle", "steer", "brake", "clutch", "gear", "engineRPM",
     "drs", "brakesTemperatureRL", "brakesTemperatureRR", "brakesTemperatureFL", "brakesTemperatureFR",
@@ -155,7 +156,7 @@ def masterSetupData(connection):
     "rearLeftTyrePressure", "rearRightTyrePressure", "frontLeftTyrePressure", "frontRightTyrePressure",
     "ballast","fuelLoad"]
     masterSetupDf.columns = setupCols
-    masterSetupDf = masterSetupDf.drop('Index', 1)
+    masterSetupDf = masterSetupDf.drop("Index", 1)
     masterSetupDf = masterSetupDf.drop("SessionTime", 1)
     return masterSetupDf
 
@@ -163,17 +164,20 @@ def masterSetupData(connection):
 def masterStatusData(connection):
     cur = connection.cursor()
     cur.execute("""SELECT frameIdentifier, fuelMix, FrontBrakeBias, fuelInTank, fuelRemainingLaps,
-    tyresWearRL, tyresWearRR, tyresWearFL, tyresWearFR, actualTyreCompound, tyresAgeLaps  FROM carStatusData""")
+    tyresWearRL, tyresWearRR, tyresWearFL, tyresWearFR, actualTyreCompound, tyresAgeLaps,
+    frontLeftWingDamage, frontRightWingDamage, rearWingDamage, gearBoxDamage, engineDamage
+    FROM carStatusData""")
     masterStatusDf = pd.DataFrame(cur.fetchall())
     statusCols = ["frameIdentifier", "fuelMix", "FrontBrakeBias", "fuelInTank", "fuelRemainingLaps",
-    "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", "actualTyreCompound", "tyresAgeLaps"]
+    "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", "actualTyreCompound", "tyresAgeLaps",
+    "frontLeftWingDamage", "frontRightWingDamage", "rearWingDamage", "gearBoxDamage", "engineDamage"]
     masterStatusDf.columns = statusCols
     return masterStatusDf
 
 def masterSessionData(connection):
     cur = connection.cursor()
     cur.execute("""SELECT frameIdentifier, weather, trackTemperature, trackLength, trackId from SessionData""")
-    sessionCols = ['frameIdentifier', 'weather', 'trackTemperature', 'trackLength', 'trackId']
+    sessionCols = ["frameIdentifier", "weather", "trackTemperature", "trackLength", "trackId"]
     masterSessionDf = pd.DataFrame(cur.fetchall())
     masterSessionDf.columns = sessionCols
     return masterSessionDf
@@ -188,31 +192,27 @@ def masterData(conn):
     masterStatusDf = masterStatusData(conn)
     masterSessionDf = masterSessionData(conn)
 
-    masterDf = masterLapDf.merge(masterPacketDf, on='frameIdentifier')#.merge(masterMotionDf, on='frameIdentifier').merge(masterTelemetryDf, on='frameIdentifier').merge(masterSetupDF, on='frameIdentifier').merge(masterStatusDf, on='frameIdentifier')
-    masterDf = masterDf.merge(masterMotionDf, on='frameIdentifier')
-    masterDf = masterDf.merge(masterTelemetryDf, on='frameIdentifier')
-    masterDf = masterDf.merge(masterStatusDf, on='frameIdentifier')
+    masterDf = masterLapDf.merge(masterPacketDf, on="frameIdentifier")#.merge(masterMotionDf, on="frameIdentifier").merge(masterTelemetryDf, on="frameIdentifier").merge(masterSetupDF, on="frameIdentifier").merge(masterStatusDf, on="frameIdentifier")
+    masterDf = masterDf.merge(masterMotionDf, on="frameIdentifier")
+    masterDf = masterDf.merge(masterTelemetryDf, on="frameIdentifier")
+    masterDf = masterDf.merge(masterStatusDf, on="frameIdentifier")
 
-    masterSetupDf = masterSetupDf.merge(masterSessionDf, on='frameIdentifier')
-
-
+    masterSetupDf = masterSetupDf.merge(masterSessionDf, on="frameIdentifier")
 
     return masterDf, masterSetupDf
 
 def sessionReducer(df):
-    df = df.drop('Header', 1)
-    df = df.drop('weatherForecastSamples', 1)
+    df = df.drop("Header", 1)
+    df = df.drop("weatherForecastSamples", 1)
 
     return df
 
 def masterDfToSQL(df1, df2, conn):
-    df1.to_sql("MasterData", con = conn, schema = None, if_exists = 'replace')
-    df2.to_sql("MasterSetupData", con = conn, schema = None, if_exists = 'replace')
+    df1.to_sql("MasterData", con = conn, schema = None, if_exists = "replace")
+    df2.to_sql("MasterSetupData", con = conn, schema = None, if_exists = "replace")
 
 def DBExpand(database):
-    # try:
     column_names = ["pkt_id", "timestamp", "packetFormat", "gameMajorVersion", "gameMinorVersion", "packetVersion", "packetId", "sessionUID", "sessionTime", "frameIdentifier", "playerCarIndex", "packet"]
-        #database = "SQL_files/F1_2020_51101ca1a9b0ff60.sqlite3" testing with this database
     conn = connect(database)
     logging.info("Expanding " + str(database))
     df = selectALL(conn)
@@ -225,5 +225,3 @@ def DBExpand(database):
     masterDfToSQL(masterDf, masterSetupDf, conn)
     trainingCalculations(database)
     conn.close()
-    # except:
-    #     logging.info("Error: Database does not exist")

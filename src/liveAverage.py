@@ -25,7 +25,7 @@ class liveAverage(threading.Thread):
         "brakesTemperatureFL", "brakesTemperatureFR",  "tyresSurfaceTemperatureRL",
         "tyresSurfaceTemperatureRR", "tyresSurfaceTemperatureFL",
         "tyresSurfaceTemperatureFR", 'engineTemperature',
-        "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR"
+        "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", "carPosition"
         ]
 
         self.summedColumns = ['summed_'+ name for name in self.columnsToSum]
@@ -54,9 +54,6 @@ class liveAverage(threading.Thread):
             self.averager()
             self.summer()
             self.writer()
-
-        # self.q.task_done()
-
         print(self.input.info())
         print(self.input)
         self.input.to_csv('CSV_Data/av.csv')

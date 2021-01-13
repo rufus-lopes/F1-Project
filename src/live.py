@@ -57,7 +57,7 @@ class mainData(object):
 
 class liveMerged(threading.Thread):
     def __init__(self, main_Data, q, DONE):
-        super().__init__(name = 'live_merge')
+        super().__init__(name = "live_merge")
         self.motion = pd.DataFrame()
         self.session = pd.DataFrame()
         self.lap = pd.DataFrame()
@@ -120,9 +120,9 @@ class liveMerged(threading.Thread):
         self.masterMotion = ["frameIdentifier", "worldPositionX", "worldPositionY", "worldPositionZ",
             "worldVelocityX", "worldVelocityY", "worldVelocityZ", "yaw", "pitch", "roll"]
 
-        self.masterSession = ['frameIdentifier', 'weather', 'trackTemperature', 'trackLength', 'trackId']
+        self.masterSession = ["frameIdentifier", "weather", "trackTemperature", "trackLength", "trackId"]
 
-        self.masterLap = ["frameIdentifier", "lastLapTime", "currentLapTime", "currentLapNum", "lapDistance"]
+        self.masterLap = ["frameIdentifier", "lastLapTime", "currentLapTime", "currentLapNum", "lapDistance", "carPosition"]
 
         self.masterSetup = ["frameIdentifier", "SessionTime", "frontWing", "rearWing", "onThrottle", "offThrottle", "frontCamber",
         "rearCamber", "frontToe", "rearToe", "frontSuspension", "rearSuspension", "frontAntiRollBar",
@@ -136,7 +136,9 @@ class liveMerged(threading.Thread):
         "tyresSurfaceTemperatureFL", "tyresSurfaceTemperatureFR", "engineTemperature"]
 
         self.masterStatus = ["frameIdentifier", "fuelMix", "frontBrakeBias", "fuelInTank", "fuelRemainingLaps",
-        "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", "actualTyreCompound", "tyresAgeLaps"]
+        "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", "actualTyreCompound", "tyresAgeLaps",
+        "frontLeftWingDamage", "frontRightWingDamage", "rearWingDamage", "gearBoxDamage", "engineDamage"]
+
 
         self.finalCols = None
 
@@ -177,9 +179,9 @@ class liveMerged(threading.Thread):
 
     def merge(self):
         if not self.motion.empty:
-            self.main = self.motion.merge(self.lap, on='frameIdentifier')
-            self.main = self.main.merge(self.telemetry, on='frameIdentifier')
-            self.main = self.main.merge(self.status, on='frameIdentifier')
+            self.main = self.motion.merge(self.lap, on="frameIdentifier")
+            self.main = self.main.merge(self.telemetry, on="frameIdentifier")
+            self.main = self.main.merge(self.status, on="frameIdentifier")
             if self.set == False:
                 self.finalColumns = self.main.columns
                 self.final = pd.DataFrame(columns = self.finalColumns)
@@ -187,9 +189,9 @@ class liveMerged(threading.Thread):
     def concat(self):
         if not self.main.empty:
             self.final = pd.concat([self.final, self.main]).reset_index(drop=True)
-            self.final = self.final.sort_values(by=['frameIdentifier'])
+            self.final = self.final.sort_values(by=["frameIdentifier"])
     def isChanged(self):
-        '''resets the dataframe every lap'''
+        """resets the dataframe every lap"""
         if not self.final.empty:
             isLapChanged = (self.final["currentLapNum"].shift(1, fill_value=self.final["currentLapNum"].head(1)) != self.final["currentLapNum"]).to_numpy()
             if True in isLapChanged:
@@ -206,7 +208,7 @@ class liveMerged(threading.Thread):
 
         self.q.put(self.DONE)
         print(self.final.info(verbose=True))
-        print('Number of motion packets: ', len(self.mainData.getMotion()))
+        print("Number of motion packets: ", len(self.mainData.getMotion()))
         # print(self.final)
     def requestQuit(self):
         self.quitflag = True
