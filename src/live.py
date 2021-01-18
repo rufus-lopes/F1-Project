@@ -179,7 +179,7 @@ class liveMerged(threading.Thread):
 
     def merge(self):
         if not self.motion.empty:
-            self.main = self.motion.merge(self.lap, on="frameIdentifier")
+            self.main = self.lap.merge(self.motion, on="frameIdentifier")
             self.main = self.main.merge(self.telemetry, on="frameIdentifier")
             self.main = self.main.merge(self.status, on="frameIdentifier")
             if self.set == False:
@@ -190,6 +190,7 @@ class liveMerged(threading.Thread):
         if not self.main.empty:
             self.final = pd.concat([self.final, self.main]).reset_index(drop=True)
             self.final = self.final.sort_values(by=["frameIdentifier"])
+            self.final.set_index('frameIdentifier', inplace=True)
     def isChanged(self):
         """resets the dataframe every lap"""
         if not self.final.empty:

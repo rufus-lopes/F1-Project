@@ -3,7 +3,7 @@ import pandas as pd
 import csv
 from src.live import liveMerged
 from time import time
-
+import pickle
 class liveAverage(threading.Thread):
     '''calculate the live average from the liveMerged'''
     def __init__(self, q, DONE):
@@ -16,7 +16,7 @@ class liveAverage(threading.Thread):
         self.quitflag = False
         self.DONE = DONE
         self.input = pd.DataFrame()
-
+        self.model = pickle.load(open('models/LinearRegression.pkl', 'rb'))
         self.columnsToSum = [
         'currentLapTime', 'worldPositionX', 'worldPositionY', 'worldPositionZ',
         'worldVelocityX', 'worldVelocityY', 'worldVelocityZ', 'yaw', 'pitch',
@@ -48,12 +48,17 @@ class liveAverage(threading.Thread):
     def writer(self):
         if not self.roll.empty:
             self.input = pd.concat([self.roll, self.sum], axis=1)
+    def predictor(self):
+        data = self.input.iloc[-1]
+        val = data
+        print(self.model.predict([val]))
     def run(self):
         while not self.quitflag:
             self.reader()
             self.averager()
             self.summer()
             self.writer()
+            #self.predictor()
         print(self.input.info())
         print(self.input)
         self.input.to_csv('CSV_Data/av.csv')

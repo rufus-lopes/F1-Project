@@ -67,7 +67,7 @@ def trainingCalculations(db):
     "brakesTemperatureFL", "brakesTemperatureFR",  "tyresSurfaceTemperatureRL",
     "tyresSurfaceTemperatureRR", "tyresSurfaceTemperatureFL",
     "tyresSurfaceTemperatureFR", 'engineTemperature',
-    "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR"
+    "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", 'carPosition'
     ]
 
     df, names, conn = getMainDf(db)

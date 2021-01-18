@@ -5,11 +5,15 @@ import plotly.express as px
 import pandas as pd
 from dash.dependencies import Input, Output
 import queue
-
+import sqlite3
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets = external_stylesheets)
-
-df = pd.read_csv('../CSV_Data/av.csv')
+conn = sqlite3.connect('../SQL_Data/constant_setup/F1_2020_09739e5250b8c6ab.sqlite3')
+cur =  conn.cursor()
+cur.execute('SELECT * FROM TrainingData')
+df = pd.DataFrame(cur.fetchall())
+names = list(map(lambda x: x[0], cur.description))
+df.columns = names
 
 available_indicators = df.columns
 
