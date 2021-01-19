@@ -50,7 +50,7 @@ def checkFullLap(df):
     for n in groupNames:
         lap = g.get_group(n)
         finalTime = lap['finalLapTime'].to_numpy()
-        if finalTime[0] > 40:
+        if finalTime[0] > 80:
             data.append(lap)
     if data:
         return pd.concat(data)
