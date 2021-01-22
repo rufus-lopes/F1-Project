@@ -4,6 +4,7 @@ import csv
 from src.live import liveMerged
 from time import time
 import pickle
+from sklearn.preprocessing import StandardScaler
 class liveAverage(threading.Thread):
     '''calculate the live average from the liveMerged'''
     def __init__(self, q, DONE):
@@ -29,7 +30,7 @@ class liveAverage(threading.Thread):
         ]
 
         self.summedColumns = ['summed_'+ name for name in self.columnsToSum]
-
+        self.sc = StandardScaler()
     def reader(self):
         fullQ = [self.q.get() for i in range(self.q.qsize())]
         if fullQ:
@@ -49,7 +50,8 @@ class liveAverage(threading.Thread):
         if not self.roll.empty:
             self.input = pd.concat([self.roll, self.sum], axis=1)
     def predictor(self):
-        data = self.input.iloc[-1]
+        scaled = self.sc(self.input)
+        data = scaled.iloc[-1]
         val = data
         print(self.model.predict([val]))
     def run(self):
