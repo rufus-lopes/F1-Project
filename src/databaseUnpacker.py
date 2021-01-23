@@ -55,10 +55,10 @@ class localFormat(object):
         angularAccelerationZ = motion_packet.angularAccelerationZ
         frontWheelsAngle = motion_packet.frontWheelsAngle
         playerData = [suspensionPositionRL, suspensionPositionRR, suspensionPositionFL, suspensionPositionFR, suspensionVelocityRL,
-suspensionVelocityRR, suspensionVelocityFL, suspensionVelocityFR, suspensionAccelerationRL, suspensionAccelerationRR,
-suspensionAccelerationFL, suspensionAccelerationFR, wheelSpeedRL, wheelSpeedRR, wheelSpeedFL, wheelSpeedFR, wheelSlipRL,
-wheelSlipRR, wheelSlipFL, wheelSlipFR, localVelocityX, localVelocityY, localVelocityZ, angularVelocityX, angularVelocityY,
-angularVelocityZ, angularAccelerationX, angularAccelerationY, angularAccelerationZ, frontWheelsAngle]
+                     suspensionVelocityRR, suspensionVelocityFL, suspensionVelocityFR, suspensionAccelerationRL, suspensionAccelerationRR,
+                     suspensionAccelerationFL, suspensionAccelerationFR, wheelSpeedRL, wheelSpeedRR, wheelSpeedFL, wheelSpeedFR, wheelSlipRL,
+                     wheelSlipRR, wheelSlipFL, wheelSlipFR, localVelocityX, localVelocityY, localVelocityZ, angularVelocityX, angularVelocityY,
+                     angularVelocityZ, angularAccelerationX, angularAccelerationY, angularAccelerationZ, frontWheelsAngle]
         arr += playerData
         return arr
     def session(self):

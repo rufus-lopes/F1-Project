@@ -14,7 +14,7 @@ from src.DBExpander import DBExpand
 from src.datatypes import (PacketHeader, PacketID, HeaderFieldsToPacketType)
 from src.UDP_unpacker import unpackUDPpacket
 from src.threading_utils import WaitConsoleThread, Barrier
-from src.live import mainData, liveMerged
+from src.live import live_storage, liveMerged
 from src.liveAverage import liveAverage
 from queue import Queue
 
@@ -372,12 +372,12 @@ class PacketRecorderThread(threading.Thread):
 class PacketReceiverThread(threading.Thread):
     """The PacketReceiverThread receives incoming telemetry packets via the network and passes them to the PacketRecorderThread for storage."""
 
-    def __init__(self, udp_port, recorder_thread,_mainData):
+    def __init__(self, udp_port, recorder_thread,_live_storage):
         super().__init__(name="receiver")
         self._udp_port = udp_port
         self._recorder_thread = recorder_thread
         self._socketpair = socket.socketpair()
-        self.mainData = _mainData
+        self.live_storage = _live_storage
 
     def close(self):
         for sock in self._socketpair:
@@ -426,7 +426,7 @@ class PacketReceiverThread(threading.Thread):
                     timestamped_packet = TimestampedPacket(timestamp, packet)
                     self._recorder_thread.record_packet(timestamped_packet)
 
-                    writer = self.mainData
+                    writer = self.live_storage
                     writer.accept_packet(packet)
 
 
@@ -496,7 +496,7 @@ def capturePackets():
 
     args = parser.parse_args()
 
-    main_data = mainData() #initialise an instance of main_Data
+    live_store = live_storage() #initialise an instance of live_storage
 
     # Start recorder thread first, then receiver thread.
 
@@ -509,14 +509,14 @@ def capturePackets():
     recorder_thread.start()
 
 
-    receiver_thread = PacketReceiverThread(args.port, recorder_thread, main_data)
+    receiver_thread = PacketReceiverThread(args.port, recorder_thread, live_store)
     receiver_thread.start()
 
     wait_console_thread = WaitConsoleThread(quit_barrier)
     wait_console_thread.start()
 
 
-    liveMerged_thread = liveMerged(main_data,q, DONE)
+    liveMerged_thread = liveMerged(live_store,q, DONE)
     liveMerged_thread.start()
 
     liveAverage_thread = liveAverage(q, DONE)
@@ -560,6 +560,7 @@ def capturePackets():
 
 
 def findFile():
+    """finds the most recently modified sql file"""
     os.chdir("SQL_Data/constant_setup")
     files = os.listdir()
     sqliteFiles = []

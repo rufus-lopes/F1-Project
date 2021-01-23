@@ -18,7 +18,7 @@ def sums(df):
 def getMainDf(db):
     conn = sqlite3.connect(db)
     cur = conn.cursor()
-    cur.execute("SELECT * FROM MasterData")
+    cur.execute('SELECT * FROM MasterData')
     df = pd.DataFrame(cur.fetchall())
     names = list(map(lambda x: x[0], cur.description))
     df.columns = names
@@ -27,13 +27,13 @@ def getMainDf(db):
     return df, names, conn
 
 def groupByLaps(df):
+    """groups data by laps and returns grouped data in a list """
     g = df.groupby('currentLapNum')
     groupNames = list(g.groups)
     data = []
     for n in groupNames:
         data.append(g.get_group(n))
     return data
-
 
 def selectSumColumns(df, columnsToSum):
     '''selects appropriate columns to be summed'''
@@ -55,45 +55,31 @@ def checkFullLap(df):
     if data:
         return pd.concat(data)
 
-
-
 def trainingCalculations(db):
 
     columnsToSum = [
     'currentLapTime', 'worldPositionX', 'worldPositionY', 'worldPositionZ',
     'worldVelocityX', 'worldVelocityY', 'worldVelocityZ', 'yaw', 'pitch',
     'roll', 'speed', 'throttle', 'steer', 'brake', 'clutch', 'gear',
-    'engineRPM', 'drs', "brakesTemperatureRL", "brakesTemperatureRR",
-    "brakesTemperatureFL", "brakesTemperatureFR",  "tyresSurfaceTemperatureRL",
-    "tyresSurfaceTemperatureRR", "tyresSurfaceTemperatureFL",
-    "tyresSurfaceTemperatureFR", 'engineTemperature',
-    "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", 'carPosition'
+    'engineRPM', 'drs', 'brakesTemperatureRL', 'brakesTemperatureRR',
+    'brakesTemperatureFL', 'brakesTemperatureFR',  'tyresSurfaceTemperatureRL',
+    'tyresSurfaceTemperatureRR', 'tyresSurfaceTemperatureFL', 'tyresSurfaceTemperatureFR',
+    'engineTemperature','tyresWearRL', 'tyresWearRR', 'tyresWearFL', 'tyresWearFR', 'carPosition'
     ]
 
     df, names, conn = getMainDf(db)
     timeStep = 10 # currently measured in packets - can easily adjust from here
     data = groupByLaps(df)
-    averagedData = []
-    for d in data:
-        averagedData.append(averages(d, timeStep))
+    
+    averagedData = [averages(d, timeStep) for d in data]# perform averaging on each lap individually
+    fullAveragedData = pd.concat(averagedData) # merge averaged laps into a single df
 
-    fullAveragedData = pd.concat(averagedData)
-    # fullAveragedData.drop(['pkt_id', 'packetId', 'sessionTime', 'frameIdentifier'], inplace=True)
+    summedData = [sums(selectSumColumns(i, columnsToSum)) for i in data]#calculate cumulative sum on each lap
+    sumNames = ['summed_'+ name for name in columnsToSum] #modify names for summed variables
+    fullSummedData = pd.concat(summedData)#merge to single df
+    fullSummedData.columns = sumNames #attach correct names
 
-    summedData = []
-    for i in data:
-        i = selectSumColumns(i, columnsToSum)
-        summedData.append(sums(i))
-
-    sumNames = columnsToSum
-    for i in range(len(sumNames)):
-        sumNames[i] = 'summed_' + sumNames[i]
-
-    fullSummedData = pd.concat(summedData)
-    fullSummedData.columns = sumNames
-
-    finalData = pd.concat([fullAveragedData, fullSummedData], axis = 1, ignore_index=False)
-
+    finalData = pd.concat([fullAveragedData, fullSummedData], axis = 1, ignore_index=False) #merge to create unified training data df
     finalData = checkFullLap(finalData)
 
-    toSQL(finalData, conn)
+    toSQL(finalData, conn) # send data back to SQL file

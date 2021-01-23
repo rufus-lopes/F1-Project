@@ -5,10 +5,12 @@ from src.live import liveMerged
 from time import time
 import pickle
 from sklearn.preprocessing import StandardScaler
+
 class liveAverage(threading.Thread):
     '''calculate the live average from the liveMerged'''
     def __init__(self, q, DONE):
-        super().__init__(name="averages")
+        super().__init__(name='averages')
+
         self.q = q
         self.merged = pd.DataFrame()
         self.timeStep = 10
@@ -18,24 +20,23 @@ class liveAverage(threading.Thread):
         self.DONE = DONE
         self.input = pd.DataFrame()
         self.model = pickle.load(open('models/LinearRegression.pkl', 'rb'))
+
         self.columnsToSum = [
         'currentLapTime', 'worldPositionX', 'worldPositionY', 'worldPositionZ',
         'worldVelocityX', 'worldVelocityY', 'worldVelocityZ', 'yaw', 'pitch',
-        'roll', 'speed', 'throttle', 'steer', 'brake', 'clutch', 'gear',
-        'engineRPM', 'drs', "brakesTemperatureRL", "brakesTemperatureRR",
-        "brakesTemperatureFL", "brakesTemperatureFR",  "tyresSurfaceTemperatureRL",
-        "tyresSurfaceTemperatureRR", "tyresSurfaceTemperatureFL",
-        "tyresSurfaceTemperatureFR", 'engineTemperature',
-        "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", "carPosition"
+        'roll', 'speed', 'throttle', 'steer', 'brake', 'clutch', 'gear','engineRPM',
+        'drs', 'brakesTemperatureRL', 'brakesTemperatureRR','brakesTemperatureFL',
+        'brakesTemperatureFR',  'tyresSurfaceTemperatureRL','tyresSurfaceTemperatureRR',
+        'tyresSurfaceTemperatureFL','tyresSurfaceTemperatureFR', 'engineTemperature',
+        'tyresWearRL', 'tyresWearRR', 'tyresWearFL', 'tyresWearFR', 'carPosition'
         ]
 
         self.summedColumns = ['summed_'+ name for name in self.columnsToSum]
-        self.sc = StandardScaler()
     def reader(self):
         fullQ = [self.q.get() for i in range(self.q.qsize())]
         if fullQ:
             self.merged = fullQ[-1]
-        if self.merged is self.DONE:
+        if self.merged is self.DONE: #session has ended
             self.q.task_done()
             self.merged = pd.DataFrame()
     def averager(self):

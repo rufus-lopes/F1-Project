@@ -59,7 +59,7 @@ def addColumnNames(motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTele
     carTelemetryDF.columns = carTelemetryCols
     carStatusDF.columns = carStatusCols
 
-    if not eventDF.empty:
+    if not eventDF.empty: #often no events in short testing session
         eventDF.columns = eventCols
 
     return motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF, carStatusDF

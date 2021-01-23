@@ -5,7 +5,8 @@ from src.UDP_unpacker import unpackUDPpacket
 from src.databaseUnpacker import localFormat
 import time
 
-class mainData(object):
+class live_storage(object):
+    '''stores live data in memory'''
     def __init__(self):
         self.packet = None
         self.motionData = []

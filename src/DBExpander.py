@@ -99,8 +99,6 @@ def Tables(motionDF, sessionDF, lapDataDF, eventDF, carSetupsDF, carTelemetryDF,
     carStatusDF.to_sql("CarStatusData", con = conn, schema=None, if_exists="replace")
     sessionDF.to_sql("SessionData", con=conn, schema=None, if_exists="replace")
 
-
-
 #getting master table
 def masterLapData(connection):
     lapTimesDf = getLapTimes(connection)
@@ -139,10 +137,12 @@ def masterTelemetryData(connection):
      tyresSurfaceTemperatureFR, engineTemperature FROM telemetryData""")
 
     masterTelemetryDf = pd.DataFrame(cur.fetchall())
+
     telemetryCols = ["frameIdentifier", "speed", "throttle", "steer", "brake", "clutch", "gear", "engineRPM",
     "drs", "brakesTemperatureRL", "brakesTemperatureRR", "brakesTemperatureFL", "brakesTemperatureFR",
     "tyresSurfaceTemperatureRL", "tyresSurfaceTemperatureRR",
     "tyresSurfaceTemperatureFL", "tyresSurfaceTemperatureFR", "engineTemperature"]
+
     masterTelemetryDf.columns = telemetryCols
     return masterTelemetryDf
 
@@ -196,7 +196,6 @@ def masterData(conn):
     masterDf = masterDf.merge(masterMotionDf, on="frameIdentifier")
     masterDf = masterDf.merge(masterTelemetryDf, on="frameIdentifier")
     masterDf = masterDf.merge(masterStatusDf, on="frameIdentifier")
-
     masterSetupDf = masterSetupDf.merge(masterSessionDf, on="frameIdentifier")
 
     return masterDf, masterSetupDf
@@ -204,7 +203,6 @@ def masterData(conn):
 def sessionReducer(df):
     df = df.drop("Header", 1)
     df = df.drop("weatherForecastSamples", 1)
-
     return df
 
 def masterDfToSQL(df1, df2, conn):
