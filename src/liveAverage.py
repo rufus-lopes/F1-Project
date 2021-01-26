@@ -5,6 +5,7 @@ from src.live import liveMerged
 from time import time
 import pickle
 from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 class liveAverage(threading.Thread):
     '''calculate the live average from the liveMerged'''
@@ -15,7 +16,7 @@ class liveAverage(threading.Thread):
         self.merged = pd.DataFrame()
         self.timeStep = 10
         self.roll = pd.DataFrame()
-        self.sum = pd.DataFrame()
+        self.sum = pd.DataFrame(dtype=np.float64)
         self.quitflag = False
         self.DONE = DONE
         self.input = pd.DataFrame()
@@ -47,21 +48,21 @@ class liveAverage(threading.Thread):
             df = self.merged[self.columnsToSum]
             self.sum = df.cumsum()
             self.sum.columns = self.summedColumns
+            self.sum = self.sum.astype(np.float64)
     def writer(self):
         if not self.roll.empty:
             self.input = pd.concat([self.roll, self.sum], axis=1)
     def predictor(self):
-        scaled = self.sc(self.input)
-        data = scaled.iloc[-1]
-        val = data
-        print(self.model.predict([val]))
+        if self.input.shape[0] > 2:
+            pred = self.model.predict(self.input)
+            print(np.mean(pred))
     def run(self):
         while not self.quitflag:
             self.reader()
             self.averager()
             self.summer()
             self.writer()
-            #self.predictor()
+            self.predictor()
         print(self.input.info())
         print(self.input)
         self.input.to_csv('CSV_Data/av.csv')

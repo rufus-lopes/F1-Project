@@ -21,7 +21,7 @@ class live_storage(object):
         5:"setup", 6:"telemetry", 7:"status", 8:"finalClassification", 9:"lobbyInfo"}
         self.packet = unpackUDPpacket(packet)
         self.type = self.packet.header.packetId
-        getattr(mainData, type_to_function[self.type])(self)
+        getattr(live_storage, type_to_function[self.type])(self)
     def motion(self):
         self.motionData.append(localFormat(self.packet, self.type).arr)
     def session(self):
@@ -110,7 +110,7 @@ class liveMerged(threading.Thread):
         "engineTemperature", "tyresPressureRL", "tyresPressureRR", "tyresPressureFL", "tyresPressureFR",
         "surfaceTypeRL", "surfaceTypeRR", "surfaceTypeFL", "surfaceTypeFR"]
 
-        self.carStatusCols = ["frameIdentifier", "SessionTime", "tractionControl", "antiLockBrakes", "fuelMix", "frontBrakeBias",
+        self.carStatusCols = ["frameIdentifier", "SessionTime", "tractionControl", "antiLockBrakes", "fuelMix", "FrontBrakeBias",
         "pitLimiterStatus", "fuelInTank", "fuelCapacity", "fuelRemainingLaps", "maxRPM", "idleRPM", "maxGears",
         "drsAllowed", "drsActivationDistance", "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR",
         "actualTyreCompound", "visualTyreCompound", "tyresAgeLaps", "tyresDamageRL", "tyresDamageRR",
@@ -136,7 +136,7 @@ class liveMerged(threading.Thread):
         "tyresSurfaceTemperatureRL", "tyresSurfaceTemperatureRR",
         "tyresSurfaceTemperatureFL", "tyresSurfaceTemperatureFR", "engineTemperature"]
 
-        self.masterStatus = ["frameIdentifier", "fuelMix", "frontBrakeBias", "fuelInTank", "fuelRemainingLaps",
+        self.masterStatus = ["frameIdentifier", "fuelMix", "FrontBrakeBias", "fuelInTank", "fuelRemainingLaps",
         "tyresWearRL", "tyresWearRR", "tyresWearFL", "tyresWearFR", "actualTyreCompound", "tyresAgeLaps",
         "frontLeftWingDamage", "frontRightWingDamage", "rearWingDamage", "gearBoxDamage", "engineDamage"]
 
