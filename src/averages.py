@@ -26,6 +26,28 @@ def getMainDf(db):
     names.pop(0)
     return df, names, conn
 
+def getIsPit(db):
+    '''checks to see whether the car has pitted in laps'''
+    conn = sqlite3.connect(db)
+    cur = conn.cursor()
+    cur.execute('SELECT currentLapNum, pitStatus from LapData')
+    df = pd.DataFrame(cur.fetchall())
+    names = list(map(lambda  x: x[0], cur.description))
+    df.columns = names
+    g = df.groupby('currentLapNum')
+    lap = []
+    isPit = []
+    for i in list(g.groups):
+        l = g.get_group(i)
+        pitStatus = l['pitStatus'].unique()
+        if len(pitStatus) == 1:
+            isPit.append(False)
+        else:
+            isPit.append(True)
+        lap.append(i)
+    pitLap = {l:p for (l,p) in zip(lap, isPit)}
+    return pitLap
+
 def groupByLaps(df):
     """groups data by laps and returns grouped data in a list """
     g = df.groupby('currentLapNum')
@@ -34,7 +56,7 @@ def groupByLaps(df):
     for n in groupNames:
         data.append(g.get_group(n))
     return data
-
+1
 def selectSumColumns(df, columnsToSum):
     '''selects appropriate columns to be summed'''
     df = df[columnsToSum]
@@ -43,14 +65,14 @@ def selectSumColumns(df, columnsToSum):
 def toSQL(df, conn):
     df.to_sql('TrainingData', con = conn, schema = None, if_exists = 'replace')
 
-def checkFullLap(df):
+def checkFullLap(df, isPit):
     g = df.groupby('currentLapNum')
     groupNames = list(g.groups)
     data = []
     for n in groupNames:
         lap = g.get_group(n)
         finalTime = lap['finalLapTime'].to_numpy()
-        if finalTime[0] > 80:
+        if finalTime[0] > 80 and not isPit[n]:
             data.append(lap)
     if data:
         return pd.concat(data)
@@ -70,7 +92,7 @@ def trainingCalculations(db):
     df, names, conn = getMainDf(db)
     timeStep = 10 # currently measured in packets - can easily adjust from here
     data = groupByLaps(df)
-    
+
     averagedData = [averages(d, timeStep) for d in data]# perform averaging on each lap individually
     fullAveragedData = pd.concat(averagedData) # merge averaged laps into a single df
 
@@ -80,6 +102,7 @@ def trainingCalculations(db):
     fullSummedData.columns = sumNames #attach correct names
 
     finalData = pd.concat([fullAveragedData, fullSummedData], axis = 1, ignore_index=False) #merge to create unified training data df
-    finalData = checkFullLap(finalData)
+    is_pit = getIsPit(db)
+    finalData = checkFullLap(finalData, is_pit)
 
     toSQL(finalData, conn) # send data back to SQL file
