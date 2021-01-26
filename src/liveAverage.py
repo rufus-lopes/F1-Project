@@ -20,7 +20,7 @@ class liveAverage(threading.Thread):
         self.quitflag = False
         self.DONE = DONE
         self.input = pd.DataFrame()
-        self.model = pickle.load(open('models/LinearRegression.pkl', 'rb'))
+        self.model = pickle.load(open('models/xgboost_model.pkl', 'rb'))
 
         self.columnsToSum = [
         'currentLapTime', 'worldPositionX', 'worldPositionY', 'worldPositionZ',
@@ -54,7 +54,7 @@ class liveAverage(threading.Thread):
             self.input = pd.concat([self.roll, self.sum], axis=1)
     def predictor(self):
         if self.input.shape[0] > 2:
-            pred = self.model.predict(self.input)
+            pred = self.model.predict(self.input.tail()) # only use the last few datapoints
             print(np.mean(pred))
     def run(self):
         while not self.quitflag:
