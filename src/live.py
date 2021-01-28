@@ -187,11 +187,12 @@ class liveMerged(threading.Thread):
                 self.finalColumns = self.main.columns
                 self.final = pd.DataFrame(columns = self.finalColumns)
                 self.set = True
+
     def concat(self):
         if not self.main.empty:
             self.final = pd.concat([self.final, self.main]).reset_index(drop=True)
-            self.final = self.final.sort_values(by=["frameIdentifier"])
             self.final.set_index('frameIdentifier', inplace=True)
+
     def isChanged(self):
         """resets the dataframe every lap"""
         if not self.final.empty:
@@ -207,10 +208,9 @@ class liveMerged(threading.Thread):
             if not self.final.empty:
                 self.q.put(self.final)
 
-
         self.q.put(self.DONE)
-        print(self.final.info(verbose=True))
-        print("Number of motion packets: ", len(self.mainData.getMotion()))
+        # print('Final Info:')
         # print(self.final)
+        # print(self.final.info(verbose=True))
     def requestQuit(self):
         self.quitflag = True

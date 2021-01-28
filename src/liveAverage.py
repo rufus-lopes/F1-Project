@@ -6,6 +6,14 @@ from time import time
 import pickle
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+from multiprocessing import Process
+import sqlite3
+from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
+import matplotlib
+import logging
+logging.getLogger('matplotlib.font_manager').disabled = True
+matplotlib.use('TkAgg')
 
 class liveAverage(threading.Thread):
     '''calculate the live average from the liveMerged'''
@@ -33,6 +41,7 @@ class liveAverage(threading.Thread):
         ]
 
         self.summedColumns = ['summed_'+ name for name in self.columnsToSum]
+
     def reader(self):
         fullQ = [self.q.get() for i in range(self.q.qsize())]
         if fullQ:
@@ -52,10 +61,11 @@ class liveAverage(threading.Thread):
     def writer(self):
         if not self.roll.empty:
             self.input = pd.concat([self.roll, self.sum], axis=1)
+
     def predictor(self):
         if self.input.shape[0] > 2:
-            pred = self.model.predict(self.input.tail()) # only use the last few datapoints
-            print(np.mean(pred))
+            pred = self.model.predict(self.input) # only use the last few datapoints
+            self.input['Prediction'] = pred
     def run(self):
         while not self.quitflag:
             self.reader()
@@ -63,9 +73,9 @@ class liveAverage(threading.Thread):
             self.summer()
             self.writer()
             self.predictor()
-        print(self.input.info())
-        print(self.input)
-        self.input.to_csv('CSV_Data/av.csv')
 
+        self.input.to_csv('CSV_Data/av.csv')
+        # print(self.input.info())
+        # print(self.input)
     def requestQuit(self):
         self.quitflag = True
