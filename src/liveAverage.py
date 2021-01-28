@@ -16,7 +16,9 @@ logging.getLogger('matplotlib.font_manager').disabled = True
 matplotlib.use('TkAgg')
 
 class liveAverage(threading.Thread):
-    '''calculate the live average from the liveMerged'''
+    '''calculate the rolling average and cumulative sum as input data to trained model.
+    Also writes live data AND prediction to SQL file which can be used for live visualisation'''
+    
     def __init__(self, q, DONE):
         super().__init__(name='averages')
 
@@ -42,6 +44,9 @@ class liveAverage(threading.Thread):
 
         self.summedColumns = ['summed_'+ name for name in self.columnsToSum]
 
+        self.conn = sqlite3.connect('SQL_Data/live_data/liveData.sqlite3')
+
+
     def reader(self):
         fullQ = [self.q.get() for i in range(self.q.qsize())]
         if fullQ:
@@ -66,6 +71,7 @@ class liveAverage(threading.Thread):
         if self.input.shape[0] > 2:
             pred = self.model.predict(self.input) # only use the last few datapoints
             self.input['Prediction'] = pred
+            self.input.to_sql('Live', conn, if_exists='replace')
     def run(self):
         while not self.quitflag:
             self.reader()
