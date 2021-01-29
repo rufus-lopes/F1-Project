@@ -44,7 +44,7 @@ class liveAverage(threading.Thread):
 
         self.summedColumns = ['summed_'+ name for name in self.columnsToSum]
 
-        self.conn = sqlite3.connect('SQL_Data/live_data/liveData.sqlite3')
+        self.file = 'SQL_Data/live_data/liveData.sqlite3'
 
 
     def reader(self):
@@ -71,6 +71,7 @@ class liveAverage(threading.Thread):
         if self.input.shape[0] > 2:
             pred = self.model.predict(self.input) # only use the last few datapoints
             self.input['Prediction'] = pred
+            conn = sqlite3.connect(self.file)
             self.input.to_sql('Live', conn, if_exists='replace')
     def run(self):
         while not self.quitflag:
