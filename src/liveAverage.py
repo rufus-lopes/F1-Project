@@ -18,7 +18,7 @@ matplotlib.use('TkAgg')
 class liveAverage(threading.Thread):
     '''calculate the rolling average and cumulative sum as input data to trained model.
     Also writes live data AND prediction to SQL file which can be used for live visualisation'''
-    
+
     def __init__(self, q, DONE):
         super().__init__(name='averages')
 
