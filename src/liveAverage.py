@@ -68,11 +68,12 @@ class liveAverage(threading.Thread):
             self.input = pd.concat([self.roll, self.sum], axis=1)
 
     def predictor(self):
-        if self.input.shape[0] > 2:
+        if not self.input.empty:
             pred = self.model.predict(self.input) # only use the last few datapoints
             self.input['Prediction'] = pred
-            conn = sqlite3.connect(self.file)
-            self.input.to_sql('Live', conn, if_exists='replace')
+            self.input.reset_index(inplace=True)
+            self.input.to_json('SQL_Data/live_data/live_json.json')
+            # self.input.to_pickle('SQL_Data/live_data/pickle.pkl')
     def run(self):
         while not self.quitflag:
             self.reader()
@@ -80,7 +81,6 @@ class liveAverage(threading.Thread):
             self.summer()
             self.writer()
             self.predictor()
-
         self.input.to_csv('CSV_Data/av.csv')
         # print(self.input.info())
         # print(self.input)

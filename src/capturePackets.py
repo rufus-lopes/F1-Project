@@ -505,6 +505,7 @@ def capturePackets():
     q = Queue() # used to send data from merged to liveAverage
     DONE = object() # quit sentinel for Queue
 
+
     recorder_thread = PacketRecorderThread(args.interval)
     recorder_thread.start()
 
@@ -523,7 +524,6 @@ def capturePackets():
     liveAverage_thread.start()
 
     # Recorder, receiver, and wait_console threads are now active. Run until we're asked to quit.
-
 
     quit_barrier.wait()
 
@@ -547,7 +547,9 @@ def capturePackets():
     liveAverage_thread.requestQuit()
     liveAverage_thread.join()
 
+
     # All done.
+
     logging.info("Decoding Database")
     database = findFile()
     if database:

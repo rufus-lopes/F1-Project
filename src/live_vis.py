@@ -7,19 +7,20 @@ from dash.dependencies import Input, Output
 import sqlite3
 import os
 import plotly.graph_objects as go
+import numpy as np
+import pickle
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets = external_stylesheets)
 
 conn = sqlite3.connect('../SQL_Data/live_data/liveData.sqlite3')
 cur =  conn.cursor()
-cur.execute('SELECT * FROM TrainingData')
+cur.execute('SELECT * FROM Live')
 df = pd.DataFrame(cur.fetchall())
 names = list(map(lambda x: x[0], cur.description))
 df.columns = names
 conn.close()
 available_indicators = df.columns
-
 
 app.layout = html.Div([
     html.Div([
@@ -49,22 +50,21 @@ app.layout = html.Div([
             ),
         dcc.Interval(
             id='interval-component',
-            interval=1000,
+            interval=500,
             n_intervals=0,
         )
         ])
 ])
 
 def update_figure(x_axis, y_axis):
-    conn = sqlite3.connect('../SQL_Data/live_data/liveData.sqlite3')
-    cur =  conn.cursor()
-    cur.execute('SELECT * FROM TrainingData')
-    df = pd.DataFrame(cur.fetchall())
-    names = list(map(lambda x: x[0], cur.description))
-    df.columns=names
-    fig = px.line(df, x=x_axis, y=y_axis)
-    conn.close()
-    return fig
+    try:
+        #df= pickle.load(open('../SQL_Data/live_data/pickle.pkl', 'rb'))
+        df = pd.read_json('../SQL_Data/live_data/live_json.json')
+        fig = px.line(df, x=x_axis, y=y_axis)
+        return fig
+    except Exception as e:
+        print(e)
+        return dash.no_update
 
 @app.callback(
 Output('live-update-graph', 'figure'),
